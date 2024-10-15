@@ -6,11 +6,19 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      borderRadius: {
+        "t-4xl": "3rem",
+      },
+      fontFamily: {
+        tiny: ["Tiny5", "sans-serif"],
+        acme: ["Acme", "sans-serif"],
+        montserrat: ["Montserrat", "san-serif"],
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
       },
     },
   },
