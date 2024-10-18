@@ -7,18 +7,22 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write src/"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@ant-design/charts": "^2.2.1",
     "@ant-design/plots": "^2.3.2",
     "@formatjs/intl-locale": "^4.0.2",
     "@formatjs/intl-pluralrules": "^5.2.16",
+    "@loaders.gl/core": "^4.2.5",
+    "@loaders.gl/csv": "^4.2.5",
+    "@loaders.gl/gltf": "^4.2.5",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@mapbox/mapbox-sdk": "^0.16.1",
-    "@react-three/drei": "^9.114.3",
-    "@react-three/fiber": "^8.17.10",
+    "@react-three/drei": "^9.43.3",
+    "@react-three/fiber": "^8.9.1",
     "@reduxjs/toolkit": "^2.3.0",
+    "@types/mapbox-gl": "^3.4.0",
     "csv-parser": "^3.0.0",
     "csv-writer": "^1.6.0",
     "date-fns": "^4.1.0",
@@ -40,9 +44,11 @@
     "web-vitals": "^4.2.3"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.10",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-slick": "^0.23.13",
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.9.0",
     "autoprefixer": "^10.4.20",
