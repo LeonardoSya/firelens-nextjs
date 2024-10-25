@@ -96,7 +96,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
         transition={{ delay: 0.1, duration: 0.2 }}
       >
         <RangeInput
-          label='Ti4通道亮度值(K)'
+          label='Ti4通道亮温(K)'
           defaultMinValue={290}
           defaultMaxValue={360}
           minValue={filterParams.minBrightTi4}
@@ -112,7 +112,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
         transition={{ delay: 0.15, duration: 0.2 }}
       >
         <RangeInput
-          label='Ti5通道亮度值(K)'
+          label='Ti5通道亮温(K)'
           defaultMinValue={250}
           defaultMaxValue={360}
           minValue={filterParams.minBrightTi5}

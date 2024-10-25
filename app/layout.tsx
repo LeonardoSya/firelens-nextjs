@@ -4,7 +4,7 @@ import { Providers } from '@/lib/provider'
 import RootLayout from '@/app/root-layout'
 import { Anton, Montserrat } from 'next/font/google'
 import localFont from 'next/font/local'
-import './globals.css'
+import '@/app/styles/globals.css'
 
 const anton = Anton({ subsets: ['latin'], variable: '--font-anton', weight: '400' })
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' })

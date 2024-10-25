@@ -21,6 +21,7 @@ import type { FirePoint, MapboxEvent } from '@/types/map.types'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
+const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 const baseUrl = 'http://localhost:3000'
 
 const listItemVariants = {
@@ -57,7 +58,7 @@ const Map: React.FC = () => {
       style: style,
       center: [116.27, 40],
       zoom: 5,
-      accessToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
+      accessToken,
       // pitch: 45,
       attributionControl: false,
     })
@@ -73,7 +74,7 @@ const Map: React.FC = () => {
 
       map.current.addControl(
         new MapboxGeocoder({
-          accessToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
+          accessToken,
           mapboxgl: mapboxgl,
         }),
       )
@@ -272,7 +273,7 @@ const Map: React.FC = () => {
   //   const fetchDistrict = async () => {
   //     try {
   //       const geocodingClient = mbxGeocoding({
-  //         accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
+  //         accessToken,
   //       })
   //       const response = await geocodingClient
   //         .reverseGeocode({
@@ -479,8 +480,8 @@ const Map: React.FC = () => {
                 `受灾地区：${firePoint.district}`,
                 `火点地理坐标：${firePoint.loc.map(c => c.toFixed(2)).join(', ')}`,
                 `火点置信度：${firePoint.confidence}`,
-                `Ti4通道亮度值 (开尔文)：${firePoint.bright_ti4}`,
-                `Ti5通道亮度值 (开尔文)：${firePoint.bright_ti5}`,
+                `Ti4通道亮温 (开尔文)：${firePoint.bright_ti4}`,
+                `Ti5通道亮温 (开尔文)：${firePoint.bright_ti5}`,
                 `火灾辐射功率 (兆瓦)：${firePoint.frp}`,
                 `受灾区域 NDVI：${firePoint.ndvi}`,
                 `受灾时间：${firePoint.dateTime}`,
@@ -497,7 +498,7 @@ const Map: React.FC = () => {
         )}
       </AnimatePresence>
       {/* 地图 */}
-      <div ref={mapContainer} className='absolute left-0 h-[100vh] w-[100vw]' />
+      <div ref={mapContainer} className='absolute left-0 h-screen w-screen' />
       <div
         className='relative left-0 top-0 z-10 h-24 w-24 cursor-pointer'
         onClick={() =>

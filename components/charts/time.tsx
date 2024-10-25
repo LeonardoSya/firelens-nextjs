@@ -46,7 +46,7 @@ const TimeScatter: React.FC = () => {
     sizeField: 5,
     theme: 'dark',
     tooltip: {
-      title: () => '火灾发生时间与火点亮度',
+      title: () => '火灾发生时间与火点亮温',
       items: [
         {
           channel: 'x',
@@ -67,7 +67,7 @@ const TimeScatter: React.FC = () => {
         },
       },
 
-      y: { title: '火点亮度（开尔文）' },
+      y: { title: '火点亮温（开尔文）' },
     },
   }
 

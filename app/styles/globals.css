@@ -18,6 +18,7 @@
 
 body {
   margin: 0;
+  overflow-x: hidden;
   min-width: 320px;
   min-height: 100vh;
   background-color: rgb(4,8,25);

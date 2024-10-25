@@ -1,13 +1,14 @@
 'use client'
 
+import React from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Canvas } from '@react-three/fiber'
+// import { Canvas } from '@react-three/fiber'
 import { useIntl } from 'react-intl'
 import { motion } from 'framer-motion'
 import Slider from 'react-slick'
-import Earth from '@/components/earth'
+// import Earth from '@/components/earth'
 import mapImg from '@/public/img/map.png'
 import mapSatellite from '@/public/img/map-satellite.png'
 import mapCity from '@/public/img/map-city.png'
@@ -16,11 +17,21 @@ import mapMobile from '@/public/img/homepage-mobile.png'
 import fireIcon from '@/public/img/fire-icon.png'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
+import '@/app/styles/bg.css'
 
 const LazyHeatMap = dynamic(() => import('@/components/charts/heat'))
-const LazyAreaScatter = dynamic(() => import('@/components/charts/area'))
-const LazyTimeScatter = dynamic(() => import('@/components/charts/time'))
-const LazyCountryPie = dynamic(() => import('@/components/charts/pie'))
+const LazyAreaScatter = dynamic(() => import('@/components/charts/area'), {
+  ssr: false,
+  loading: () => <div>加载中...</div>
+})
+const LazyTimeScatter = dynamic(() => import('@/components/charts/time'), {
+  ssr: false,
+  loading: () => <div>加载中...</div>
+})
+const LazyCountryPie = dynamic(() => import('@/components/charts/pie'), {
+  ssr: false,
+  loading: () => <div>加载中...</div>
+})
 
 const settings = {
   dots: true,
@@ -43,17 +54,22 @@ const images = [
 
 const MotionLink = motion.create(Link)
 
-export default function HomePage() {
+const HomePage: React.FC = () => {
   const intl = useIntl()
 
   return (
     <main className='relative h-screen w-full'>
+      <div className='g-bg -z-1 fixed h-screen w-full overflow-hidden'>
+        <div className='absolute left-[-10%] top-[-20%] h-[500px] w-[800px] bg-[#ffee55] opacity-50 [clip-path:polygon(0_10%,30%_0,100%_40%,70%_100%,20%_90%)]' />
+        <div className='absolute left-[20%] top-[-30%] h-[600px] w-[1000px] bg-[#E950D1] opacity-50 [clip-path:polygon(10%_0,100%_70%,100%_100%,20%_90%)]' />
+        <div className='absolute right-[-20%] top-[-10%] h-[400px] w-[700px] bg-[rgba(87,80,233)] opacity-50 [clip-path:polygon(80%_0,100%_70%,100%_100%,20%_90%)]' />
+      </div>
       {/* background */}
-      <div className='earth absolute left-0 top-0 z-0 h-full w-full'>
+      {/* <div className='earth absolute left-0 top-0 z-0 h-full w-full'>
         <Canvas>
           <Earth />
         </Canvas>
-      </div>
+      </div> */}
       <div className='relative z-10 mx-auto max-w-7xl px-6 pt-24 sm:pt-32 md:pt-56 lg:px-8'>
         <div className='mx-auto max-w-2xl items-center justify-between lg:flex lg:max-w-none'>
           <motion.div
@@ -166,13 +182,13 @@ export default function HomePage() {
           >
             <p className='font-montserrat text-lg tracking-wider text-neutral-300 md:max-w-xl lg:max-w-4xl lg:text-xl'>
               Firelens
-              基于高分热点数据产品，能够进行全球火灾发生时间模型的识别，如火灾频发的时段。4μm通道的火点亮度温度和火灾辐射功率（FRP）能够反映火灾强度，较高的亮度温度和较大的FRP值通常表示更严重的火灾。Firelens
+              基于高分热点数据产品，能够进行全球火灾发生时间模型的识别，如火灾频发的时段。4μm通道的火点亮温和火灾辐射功率（FRP）能够反映火灾强度，较高的亮温和较大的FRP值通常表示更严重的火灾。Firelens
               提供的动态火灾数据可视化有助于用户了解不同地区、不同时间的火灾发生情况,为全球尺度的火灾管理和决策提供支持
             </p>
             <p className='mt-6 font-montserrat tracking-wider text-neutral-400'>
-              全球48h内特大火灾发生时间与火点亮度图
+              全球48h内特大火灾发生时间与火点亮温图
             </p>
-            <LazyTimeScatter />
+            {/* <LazyTimeScatter /> */}
             <div className='mt-12 flex w-full flex-col gap-4 lg:max-w-5xl lg:flex-row'>
               <LazyCountryPie />
               <LazyAreaScatter />
@@ -188,10 +204,10 @@ export default function HomePage() {
             <p className='max-w-lg font-montserrat text-lg tracking-wider text-neutral-300 md:max-w-xl lg:max-w-4xl lg:text-xl'>
               Firelens 通过多元数据交叉实现了高质量上游火点数据质量控制
               <br />
-              借助NDVI（归一化植被指数）进行火点筛选。NDVI使用近红外和红光波段进行计算，计算公式为(NIR-R)/(NIR+R)，能够反映植被的生长状态和覆盖程度。在区分植被与化工厂、城市热岛区域方面具有优势。通过将NDVI与火点检测算法相结合可以更精准地识别出真正的火灾点，减少因其他高温源（如城市热岛效应区域、工厂热源等）造成的误判
+              借助NDVI（归一化植被指数）进行火点筛选。NDVI使用近红外和红光波段进行计算，计算公式为(NIR-R)/(NIR+R)，够反映植被的生长状态和覆盖程度。在区分植被与化工厂、城市热岛区域方面具有优势。通过将NDVI与火点检测算法相结合可以更精准地识别出真正的火灾点，减少因其他高温源（如城市热岛效应区域、工厂热源等）造成的误判
             </p>
             <p className='mt-6 font-montserrat tracking-wider text-neutral-400'>
-              江浙部分地区NDVI 3D蜂窝热力图 （ 2024年7月 ）
+              京津冀部分地区NDVI 3D蜂窝热力图 （ 2024年7月 ）
             </p>
           </motion.div>
           <motion.div
@@ -237,3 +253,5 @@ export default function HomePage() {
     </main>
   )
 }
+
+export default HomePage
