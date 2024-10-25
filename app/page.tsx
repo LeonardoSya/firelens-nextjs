@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -18,19 +18,20 @@ import fireIcon from '@/public/img/fire-icon.png'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import '@/app/styles/bg.css'
+import 'css-doodle'
 
 const LazyHeatMap = dynamic(() => import('@/components/charts/heat'))
 const LazyAreaScatter = dynamic(() => import('@/components/charts/area'), {
   ssr: false,
-  loading: () => <div>加载中...</div>
+  loading: () => <div>加载中...</div>,
 })
 const LazyTimeScatter = dynamic(() => import('@/components/charts/time'), {
   ssr: false,
-  loading: () => <div>加载中...</div>
+  loading: () => <div>加载中...</div>,
 })
 const LazyCountryPie = dynamic(() => import('@/components/charts/pie'), {
   ssr: false,
-  loading: () => <div>加载中...</div>
+  loading: () => <div>加载中...</div>,
 })
 
 const settings = {
@@ -54,17 +55,69 @@ const images = [
 
 const MotionLink = motion.create(Link)
 
+const CssDoodleComponent = () => {
+  const doodleRef = useRef(null)
+
+  return (
+    <div
+      ref={doodleRef}
+      dangerouslySetInnerHTML={{
+        __html: `
+          <css-doodle>
+            :doodle {
+              @grid: 1x20 / 100vmin;
+            }
+            @place-cell: center;
+            width: @rand(60vmin, 100vmin);
+            height: @rand(60vmin, 100vmin);
+            transform: translate(@rand(-120%, 120%), @rand(-80%, 80%)) scale(@rand(.8, 2.8)) skew(@rand(45deg));
+            clip-path: polygon(
+              @r(0, 30%) @r(0, 50%), 
+              @r(30%, 60%) @r(0%, 30%), 
+              @r(60%, 100%) @r(0%, 50%), 
+              @r(60%, 100%) @r(50%, 100%), 
+              @r(30%, 60%) @r(60%, 100%),
+              @r(0, 30%) @r(60%, 100%)
+            );
+            background: @pick(#f44336, #e91e63, #9c27b0, #673ab7, #3f51b5, #60569e, #e6437d, #ebbf4d, #00bcd4, #03a9f4, #2196f3, #009688, #5ee463, #f8e645, #ffc107, #ff5722, #43f8bf, #e136eb, #f57c23, #32ed39);
+            opacity: @rand(.3, .6);
+            position: relative;
+            top: @rand(-80%, 80%);
+            left: @rand(-80%, 80%);
+            animation: colorChange @rand(6.1s, 26.1s) infinite @rand(-.5s, -2.5s) linear alternate;
+            @keyframes colorChange {
+              100% {
+                left: 0;
+                top: 0;
+                filter: hue-rotate(360deg);
+              }
+            }
+            position: relative;
+            top: @rand(-80%, 80%);
+            left: @rand(-80%, 80%);
+            animation: colorChange @rand(6.1s, 16.1s) infinite @rand(-.5s, -2.5s) linear alternate;
+            @keyframes colorChange {
+              100% {
+                left: 0;
+                top: 0;
+                filter: hue-rotate(360deg);
+              } 
+            }
+          </css-doodle>
+        `,
+      }}
+    />
+  )
+}
+
 const HomePage: React.FC = () => {
   const intl = useIntl()
 
   return (
     <main className='relative h-screen w-full'>
       <div className='g-bg -z-1 fixed h-screen w-full overflow-hidden'>
-        <div className='absolute left-[-10%] top-[-20%] h-[500px] w-[800px] bg-[#ffee55] opacity-50 [clip-path:polygon(0_10%,30%_0,100%_40%,70%_100%,20%_90%)]' />
-        <div className='absolute left-[20%] top-[-30%] h-[600px] w-[1000px] bg-[#E950D1] opacity-50 [clip-path:polygon(10%_0,100%_70%,100%_100%,20%_90%)]' />
-        <div className='absolute right-[-20%] top-[-10%] h-[400px] w-[700px] bg-[rgba(87,80,233)] opacity-50 [clip-path:polygon(80%_0,100%_70%,100%_100%,20%_90%)]' />
+        <CssDoodleComponent />
       </div>
-      {/* background */}
       {/* <div className='earth absolute left-0 top-0 z-0 h-full w-full'>
         <Canvas>
           <Earth />
@@ -104,7 +157,7 @@ const HomePage: React.FC = () => {
             </p>
             <p
               style={{ userSelect: 'none' }}
-              className='my-6 leading-tight tracking-wide text-neutral-600 dark:text-gray-600 sm:text-xl sm:leading-normal'
+              className='my-6 leading-tight tracking-wide text-neutral-600 dark:text-gray-500 sm:text-xl sm:leading-normal'
             >
               {intl.formatMessage({ id: 'home.team' })}
             </p>
@@ -204,7 +257,7 @@ const HomePage: React.FC = () => {
             <p className='max-w-lg font-montserrat text-lg tracking-wider text-neutral-300 md:max-w-xl lg:max-w-4xl lg:text-xl'>
               Firelens 通过多元数据交叉实现了高质量上游火点数据质量控制
               <br />
-              借助NDVI（归一化植被指数）进行火点筛选。NDVI使用近红外和红光波段进行计算，计算公式为(NIR-R)/(NIR+R)，够反映植被的生长状态和覆盖程度。在区分植被与化工厂、城市热岛区域方面具有优势。通过将NDVI与火点检测算法相结合可以更精准地识别出真正的火灾点，减少因其他高温源（如城市热岛效应区域、工厂热源等）造成的误判
+              借助NDVI（归一化植被指数）进行火点筛选。NDVI使用近红外和红光波段进行计算，计算公式为(NIR-R)/(NIR+R)，够反映植被的生长状态和覆盖程度。在区分植被与化工厂、城市热岛��域方面具有优势。通过将NDVI与火点检测算法相结合可以更精准地识别出真正的火灾点，减少因其他高温源（如城市热岛效应区域、工厂热源等）造成的误判
             </p>
             <p className='mt-6 font-montserrat tracking-wider text-neutral-400'>
               京津冀部分地区NDVI 3D蜂窝热力图 （ 2024年7月 ）

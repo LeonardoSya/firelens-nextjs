@@ -106,7 +106,7 @@ const HeatMap: React.FC = () => {
   ]
 
   return (
-    <div className='relative h-96 w-full md:h-[36rem] md:w-3/4 overflow-y-hidden'>
+    <div className='relative h-96 w-full overflow-y-hidden md:h-[36rem] md:w-3/4'>
       <DeckGL
         layers={layers}
         effects={[lightingEffect]}

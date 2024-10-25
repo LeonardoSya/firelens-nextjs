@@ -22,6 +22,7 @@
     "@types/mapbox-gl": "^3.4.0",
     "@types/pg": "^8.11.10",
     "@vercel/postgres": "^0.10.0",
+    "css-doodle": "^0.40.8",
     "csv-parser": "^3.0.0",
     "csv-writer": "^1.6.0",
     "date-fns": "^4.1.0",

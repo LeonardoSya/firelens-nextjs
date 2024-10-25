@@ -9,11 +9,11 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose',
     serverComponentsExternalPackages: [
-      '@ant-design/charts', 
+      '@ant-design/charts',
       '@ant-design/plots',
       '@antv/g2',
-      'd3-array'
-    ]
+      'd3-array',
+    ],
   },
   env: {
     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
