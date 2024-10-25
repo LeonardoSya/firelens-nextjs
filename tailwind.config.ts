@@ -1,27 +1,23 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  darkMode: "class",
+  content: ['./components/**/*.{js,ts,jsx,tsx,mdx}', './app/**/*.{js,ts,jsx,tsx,mdx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       borderRadius: {
-        "t-4xl": "3rem",
+        't-4xl': '3rem',
       },
       fontFamily: {
-        tiny: ["Tiny5", "sans-serif"],
-        acme: ["Acme", "sans-serif"],
-        montserrat: ["Montserrat", "san-serif"],
+        tiny: ['var(--font-tiny5)', 'sans-serif'],
+        montserrat: ['var(--font-montserrat)', 'sans-serif'],
+        anton: ['var(--font-anton)', 'sans-serif'],
       },
       backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
     },
   },
   plugins: [],
-};
-export default config;
+}
+export default config

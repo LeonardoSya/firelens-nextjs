@@ -5,3 +5,5 @@ coverage
 *.jpg
 *.png
 data/
+node_modules
+.next
