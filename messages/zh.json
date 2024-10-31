@@ -1,0 +1,27 @@
+{
+  "root": {
+    "tab1": "产品介绍",
+    "tab2": "热点平台",
+    "tab3": "开发文档",
+    "signIn": "登录",
+    "getStart": {
+      "short": "体验",
+      "long": "立刻"
+    }
+  },
+  "home": {
+    "title1": "全球火灾动态监测平台",
+    "title2": "多维热点数据监测一站式解决方案",
+    "introduction": "Firelens 旨在为全球范围内火灾热点及多维生态数据的动态监测和分析预测提供一个响应迅速、精准度高、性能出色的跨端可视化解决方案。",
+    "team": "北京林业大学 ·  Firelens 团队"
+  },
+  "map": {
+    "menu": {
+      "filterDate": "筛选监测时段",
+      "filterFrp": "受灾严重度",
+      "filterDayNight": "筛选时段",
+      "day": "白天",
+      "night": "夜晚"
+    }
+  }
+}

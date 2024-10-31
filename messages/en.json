@@ -1,0 +1,27 @@
+{
+  "root": {
+    "tab1": "Introduction",
+    "tab2": "Platform",
+    "tab3": "Docs",
+    "signIn": "Sign In",
+    "getStart": {
+      "short": "Get Started",
+      "long": "Let's "
+    }
+  },
+  "home": {
+    "title1": "Global Fire Dynamic Monitoring Platform",
+    "title2": "A One-Stop Solution for Multi-dimensional Hotspot Data",
+    "introduction": "—— The platform aims to provide a responsive, highly accurate, and high-performance cross-platform visualization solution for monitoring fire hotspots and multi-dimensional ecological data globally.",
+    "team": "Beijing Forestry University · Firelens Team"
+  },
+  "map": {
+    "menu": {
+      "filterDate": "Filter Period",
+      "filterFrp": "Disaster Severity",
+      "filterDayNight": "Filter Day or Night",
+      "day": "Day",
+      "night": "Night"
+    }
+  }
+}
