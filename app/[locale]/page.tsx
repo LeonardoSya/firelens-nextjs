@@ -205,8 +205,14 @@ const HomePage: React.FC = () => {
               数据来源于 NASA VIIRS 375m Active Fire 产品
             </p>
           </motion.div>
-          <Link href='/map' className='m-4 flex flex-col items-center'>
+          <div className='m-4 flex flex-col items-center'>
             <motion.button
+              onClick={() => {
+                window.scrollTo({
+                  top: 20,
+                  behavior: 'smooth',
+                })
+              }}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -228,7 +234,7 @@ const HomePage: React.FC = () => {
                 尝试一下
               </span>
             </motion.button>
-          </Link>
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             viewport={{ once: true }}

@@ -68,8 +68,46 @@ const Map: React.FC = () => {
     }
 
     return () => {
-      mapInstance.current ?? mapInstance.current.remove()
-      mapInstance.current = null
+      if (mapInstance.current) {
+        mapInstance.current.off('load', () => {})
+        mapInstance.current.off('style.load', () => {})
+        mapInstance.current.off('styledata', () => {})
+
+        if (mapInstance.current._controls) {
+          const controls = [...mapInstance.current._controls]
+          controls.forEach(control => {
+            try {
+              mapInstance.current.removeControl(control)
+            } catch (error) {
+              console.error('Error removing control:', error)
+            }
+          })
+        }
+
+        if (mapInstance.current.getStyle()) {
+          const layers = mapInstance.current.getStyle().layers || []
+          layers.forEach(layer => {
+            if (mapInstance.current.getLayer(layer.id)) {
+              mapInstance.current.removeLayer(layer.id)
+            }
+          })
+
+          const sources = mapInstance.current.getStyle().sources || {}
+          Object.keys(sources).forEach(sourceId => {
+            if (mapInstance.current.getSource(sourceId)) {
+              mapInstance.current.removeSource(sourceId)
+            }
+          })
+        }
+
+        try {
+          mapInstance.current.remove()
+        } catch (error) {
+          console.error('Error removing map:', error)
+        }
+
+        mapInstance.current = null
+      }
     }
   }, [])
 
@@ -88,13 +126,13 @@ const Map: React.FC = () => {
     mapInstance.current.setStyle(mapState.style)
 
     return () => {
-      mapInstance.current ?? mapInstance.current.off('style.load', applyStyle)
+      if (mapInstance.current) mapInstance.current.off('style.load', applyStyle)
     }
   }, [mapState.style])
 
   // 风场图层
   useEffect(() => {
-    if (!mapInstance.current || !mapState.isMapLoaded) return
+    if (!mapInstance.current) return
 
     const handleStyleLoad = () => {
       if (mapState.showWindLayer) {
@@ -217,10 +255,10 @@ const Map: React.FC = () => {
       ? 'mapbox://styles/mapbox/dark-v11'
       : 'mapbox://styles/mapbox/standard'
 
-    if (mapInstance.current.getStyle().name !== newStyle) {
+    if (mapInstance.current.loaded() && mapInstance.current.getStyle().name !== newStyle) {
       mapInstance.current.once('styledata', handleStyleLoad)
       mapInstance.current.setStyle(newStyle)
-    } else {
+    } else if (mapInstance.current.loaded()) {
       handleStyleLoad()
     }
 
