@@ -45,7 +45,35 @@ const Map: React.FC = () => {
         setMapState(prev => ({ ...prev, isMapLoaded: true }))
 
         // 地图控件
-        map.addControl(new MapboxGeocoder({ accessToken, mapboxgl: mapboxgl }))
+        const geocoder = new MapboxGeocoder({
+          accessToken,
+          mapboxgl: mapboxgl,
+          placeholder: '搜索',
+        })
+
+        const geocoderContainer = document.createElement('div')
+        geocoderContainer.className = 'geocoder-container'
+        map.addControl(geocoder, 'top-right')
+
+        const style = document.createElement('style')
+        style.textContent = `
+          @media (max-width: 768px) {
+            .mapboxgl-ctrl-geocoder {
+              min-width: 120px !important;
+              width: auto !important;
+              max-width: 160px !important;
+            }
+            .mapboxgl-ctrl-geocoder--input {
+              height: 36px !important;
+              font-size: 14px !important;
+            }
+            .mapboxgl-ctrl-geocoder--icon {
+              top: 8px !important;
+            }
+          }
+        `
+        document.head.appendChild(style)
+
         map.addControl(new mapboxgl.NavigationControl())
         map.addControl(new mapboxgl.FullscreenControl())
         map.addControl(new mapboxgl.GeolocateControl())

@@ -13,6 +13,9 @@ interface CountryData {
 
 const CountryPie: React.FC = () => {
   const [data, setData] = useState<CountryData[]>([])
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 0,
+  )
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +30,14 @@ const CountryPie: React.FC = () => {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const config = {
     data,
     angleField: 'counts',
@@ -34,10 +45,13 @@ const CountryPie: React.FC = () => {
     radius: 0.4,
     theme: 'dark',
     innerRadius: 0.9,
-    labels: [
-      { text: 'country_zh', style: { fontSize: 12, fontWeight: 'bold' } },
-      { text: 'counts', dy: 14, style: { fontWeight: 'bold' } },
-    ],
+    labels:
+      windowWidth >= 768
+        ? [
+            { text: 'country_zh', style: { fontSize: 12, fontWeight: 'bold' } },
+            { text: 'counts', dy: 14, style: { fontWeight: 'bold' } },
+          ]
+        : [],
     interactions: [
       {
         type: 'pie-legend-active',
@@ -58,7 +72,7 @@ const CountryPie: React.FC = () => {
     scale: {
       color: {
         palette: 'spectral',
-        offset: (t: any) => t + 0.1,
+        offset: (t: number) => t + 0.1,
       },
     },
     annotations: [
@@ -67,7 +81,7 @@ const CountryPie: React.FC = () => {
         style: {
           text: '48h内发生火灾\n最多的20个国家',
           textAlign: 'center',
-          fontSize: '2.4rem',
+          fontSize: '2rem',
           fontStyle: 'bold',
           x: '50%',
           y: '50%',
@@ -78,7 +92,7 @@ const CountryPie: React.FC = () => {
   }
 
   return (
-    <div className='h-[40rem] w-full lg:h-[40rem] lg:w-1/2'>
+    <div className='h-[30rem] w-full lg:h-[40rem] lg:w-1/2'>
       <Pie {...config} />
     </div>
   )
