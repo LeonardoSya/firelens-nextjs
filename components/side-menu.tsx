@@ -64,7 +64,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
         animate={{ x: isOpen ? '11.5rem' : 0 }}
         transition={springTransition}
         onClick={() => setIsOpen(!isOpen)}
-        className='fixed left-0 top-80 z-10 rounded-r-xl bg-white p-2 shadow-lg dark:bg-gray-950'
+        className='fixed left-0 top-60 z-10 rounded-r-xl bg-white p-2 shadow-lg dark:bg-gray-950'
       >
         <svg
           xmlns='http://www.w3.org/2000/svg'
@@ -81,7 +81,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
         initial={false}
         animate={{ x: isOpen ? 0 : '-100%' }}
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-        className='fixed left-0 top-80 w-56 rounded-br-xl bg-white p-4 shadow-lg dark:bg-gradient-to-t dark:from-gray-900 dark:to-gray-950'
+        className='fixed left-0 top-60 w-56 rounded-br-xl bg-white p-4 shadow-lg dark:bg-gradient-to-t dark:from-gray-900 dark:to-gray-950'
       >
         <div className='flex items-center gap-x-5 px-2 py-4'>
           <svg

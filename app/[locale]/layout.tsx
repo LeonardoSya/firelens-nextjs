@@ -15,7 +15,7 @@ const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat
 const tiny5 = localFont({ src: '../../public/fonts/Tiny5.ttf', variable: '--font-tiny5' })
 
 export const metadata: Metadata = {
-  title: 'Firelens 全球火灾动态监测平台 多维热点数据一站式解决方案',
+  title: 'Firelens',
   description: '全球火灾动态监测平台',
 }
 
