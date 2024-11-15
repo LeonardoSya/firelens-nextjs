@@ -1,5 +1,3 @@
-// ! Read data from pg
-
 'use client'
 
 import React from 'react'
