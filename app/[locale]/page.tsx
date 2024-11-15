@@ -250,7 +250,7 @@ const HomePage: React.FC = () => {
             <p className='mt-6 font-montserrat tracking-wider text-neutral-400'>
               全球48h内特大火灾发生时间与火点亮温图
             </p>
-            {/* <LazyTimeScatter /> */}
+            <LazyTimeScatter />
             <div className='mt-12 flex w-full flex-col gap-4 lg:max-w-5xl lg:flex-row'>
               <LazyCountryPie />
               <LazyAreaScatter />

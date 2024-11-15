@@ -8,16 +8,14 @@ interface DataItem {
   bright: number;
 }
 
-const baseUrl = 'http://localhost:3000'
-
 const TimeScatter: React.FC = () => {
   const [data, setData] = useState<DataItem[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const url = `${baseUrl}/api/plot-get-time`
-        const res = await fetch(url)
+        const res = await fetch('/api/time')
+        if (!res.ok) throw new Error('Network Error')
         const jsonData = await res.json()
 
         const scatterData = jsonData.map((item: DataItem) => ({
