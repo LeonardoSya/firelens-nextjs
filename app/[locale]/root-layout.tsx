@@ -6,7 +6,7 @@ import { Link } from '@/i18n/routing'
 import { useLocale, useTranslations } from 'next-intl'
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
 import { usePathname, useRouter } from '@/i18n/routing'
-import { toggle } from '@/features/menu-slice'
+import { toggle } from '@/redux/menu-slice'
 import Navigation from '@/components/navigation'
 
 const MotionLink = motion.create(Link)

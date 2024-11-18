@@ -1,28 +1,42 @@
 'use client'
 
 import mapboxgl from 'mapbox-gl'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import GlobeMinimap from 'mapbox-gl-globe-minimap'
-
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import mbxGeocoding from '@mapbox/mapbox-sdk/services/geocoding'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import SideMenu from '@/components/side-menu'
+import { useAppSelector } from '@/lib/hooks'
+import { RootState } from '@/lib/store'
+import { type FirePoint, MapboxEvent } from 'map-types'
+import { format } from 'date-fns'
+import { throttle } from 'lodash'
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
 const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapInstance = useRef<mapboxgl.Map | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+
   const [mapState, setMapState] = useState({
     isMapLoaded: false,
     style: 'mapbox://styles/mapbox/standard',
     showWindLayer: false,
   })
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false)
+  const [firePoint, setFirePoint] = useState<FirePoint | null>(null)
+  const [showFirePointId, setShowFirePointId] = useState<number>(0)
+
+  const filterParams = useAppSelector((state: RootState) => state.filter)
 
   // 初始化地图
   useEffect(() => {
@@ -32,7 +46,7 @@ const Map: React.FC = () => {
     }
 
     if (!mapInstance.current && mapContainer.current) {
-      const map = new mapboxgl.Map({
+      mapInstance.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: mapState.style,
         center: [116.27, 40],
@@ -41,7 +55,7 @@ const Map: React.FC = () => {
         attributionControl: false,
       })
 
-      map.on('load', () => {
+      mapInstance.current.on('load', () => {
         setMapState(prev => ({ ...prev, isMapLoaded: true }))
 
         // 地图控件
@@ -53,7 +67,7 @@ const Map: React.FC = () => {
 
         const geocoderContainer = document.createElement('div')
         geocoderContainer.className = 'geocoder-container'
-        map.addControl(geocoder, 'top-right')
+        mapInstance.current.addControl(geocoder, 'top-right')
 
         const style = document.createElement('style')
         style.textContent = `
@@ -74,10 +88,10 @@ const Map: React.FC = () => {
         `
         document.head.appendChild(style)
 
-        map.addControl(new mapboxgl.NavigationControl())
-        map.addControl(new mapboxgl.FullscreenControl())
-        map.addControl(new mapboxgl.GeolocateControl())
-        map.addControl(
+        mapInstance.current.addControl(new mapboxgl.NavigationControl())
+        mapInstance.current.addControl(new mapboxgl.FullscreenControl())
+        mapInstance.current.addControl(new mapboxgl.GeolocateControl())
+        mapInstance.current.addControl(
           new GlobeMinimap({
             landColor: 'rgb(250,250,250)',
             waterColor: 'rgba(3,7,18,.8)',
@@ -87,12 +101,10 @@ const Map: React.FC = () => {
       })
 
       // 光影效果
-      map.on('style.load', () => {
-        map.setConfigProperty('basemap', 'lightPreset', 'dusk')
-        map.setConfigProperty('basemap', 'show3dObjects', true)
+      mapInstance.current.on('style.load', () => {
+        mapInstance.current.setConfigProperty('basemap', 'lightPreset', 'dusk')
+        mapInstance.current.setConfigProperty('basemap', 'show3dObjects', true)
       })
-
-      mapInstance.current = map
     }
 
     return () => {
@@ -139,6 +151,185 @@ const Map: React.FC = () => {
     }
   }, [])
 
+  // 加载火点数据
+  const fetchData = useCallback(async () => {
+    try {
+      setIsDataLoaded(true)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+      abortControllerRef.current = new AbortController()
+
+      const bounds = mapInstance.current.getBounds()
+      const baseParams = {
+        minLat: bounds.getSouth(),
+        maxLat: bounds.getNorth(),
+        minLon: bounds.getWest(),
+        maxLon: bounds.getEast(),
+        ...filterParams,
+      }
+
+      const queryParams = new URLSearchParams(
+        Object.entries(baseParams).filter(([_, value]) => value != null) as [string, string][],
+      ).toString()
+
+      const resData = await fetch(`/api/map?${queryParams}`, {
+        signal: abortControllerRef.current.signal,
+      }).then(res => res.json())
+
+      if (!resData.features || !Array.isArray(resData.features)) {
+        console.error('Invalid data sturcture: ', resData)
+        return null
+      }
+      return resData
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError')
+        console.error('Error fetchig data: ', error)
+      return null
+    } finally {
+      setIsDataLoaded(false)
+    }
+  }, [filterParams])
+
+  // 渲染火点数据
+  const renderData = useCallback(async () => {
+    const data = await fetchData()
+    console.log(data)
+    if (!data) {
+      console.log('No data received')
+      return
+    }
+    if (mapInstance.current.getSource('fire_points')) {
+      // 若数据源已存在，直接使用setData更新数据
+      ;(mapInstance.current.getSource('fire_points') as mapboxgl.GeoJSONSource).setData(data)
+    } else {
+      mapInstance.current.addSource('fire_points', {
+        type: 'geojson',
+        data,
+      })
+
+      mapInstance.current.addLayer({
+        id: 'fire_points_layer',
+        type: 'circle',
+        source: 'fire_points',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#e20303',
+          'circle-blur': 0.4,
+          'circle-stroke-color': '#333333',
+          'circle-stroke-width': 1,
+          'circle-stroke-opacity': 0.7,
+          'circle-emissive-strength': 1,
+        },
+      })
+      // 鼠标事件
+      mapInstance.current.on('mouseenter', 'fire_points_layer', () => {
+        mapInstance.current.getCanvas().style.cursor = 'pointer'
+      })
+      mapInstance.current.on('mouseleave', 'fire_points_layer', () => {
+        mapInstance.current.getCanvas().style.cursor = ''
+      })
+      mapInstance.current.on('click', 'fire_points_layer', (e: MapboxEvent) => {
+        const feature = e.features[0]
+        const properties = feature.properties
+        const coordinates = feature.geometry.coordinates.slice()
+        const acqDate = new Date(properties.acq_date)
+        const hours = Math.floor(properties.acq_time / 100)
+        const minutes = properties.acq_time % 100
+        acqDate.setUTCHours(hours, minutes)
+        const dateTime = format(acqDate, 'yyyy-MM-dd HH:mm:ss')
+
+        setFirePoint({
+          loc: coordinates,
+          district: '',
+          confidence: properties.confidence,
+          frp: properties.frp,
+          bright_ti4: properties.bright_ti4,
+          bright_ti5: properties.bright_ti5,
+          daynight: properties.daynight === 'D',
+          dateTime: dateTime,
+          satellite: properties.satellite,
+          ndvi: properties.ndvi / 10000,
+        })
+        setShowFirePointId(properties.bright_ti4)
+        mapInstance.current.flyTo({
+          center: coordinates as [number, number],
+          zoom: 9,
+          duration: 2000,
+          pitch: 30,
+        })
+      })
+    }
+  }, [fetchData])
+
+  const updateOnMove = useCallback(
+    throttle(() => {
+      renderData()
+    }, 500),
+    [renderData],
+  )
+
+  // 地图加载后挂载渲染火点逻辑
+  useEffect(() => {
+    if (!mapInstance.current) return
+    renderData()
+    mapInstance.current.on('moveend', updateOnMove)
+    mapInstance.current.on('zoomend', updateOnMove)
+
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.off('moveend', updateOnMove)
+        mapInstance.current.off('zoomend', updateOnMove)
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [mapState.isMapLoaded, renderData, updateOnMove])
+
+  useEffect(() => {
+    if (mapInstance.current && mapState.isMapLoaded) {
+      renderData()
+    } else {
+      return
+    }
+    mapInstance.current.on('style.load', () => {
+      renderData()
+    })
+  }, [mapState.isMapLoaded])
+
+  // 火点数据逆向地理编码
+  useEffect(() => {
+    if (!firePoint) return
+
+    const getDistrict = () => {
+      try {
+        const geocodingClient = mbxGeocoding({ accessToken })
+        const res = geocodingClient
+          .reverseGeocode({ query: firePoint.loc, limit: 1, language: ['zh'] })
+          .send()
+        const match = res.body.features[0]
+        if (match) {
+          const { context = [] } = match
+          const getText = (idPart: string) =>
+            context.find((c: { id: string | string[] }) => c.id.includes(idPart))?.text || ''
+          const country = getText('country')
+          const province = getText('region')
+          const city = getText('place')
+          const locality = getText('locality')
+          setFirePoint(prev => ({
+            ...prev,
+            district: `${country} ${province} ${city}${locality}`,
+          }))
+        }
+      } catch (error) {
+        console.error('Reverse Geocoding Error: ', error)
+      }
+    }
+
+    getDistrict()
+  }, [firePoint])
+
   // 底图切换
   useEffect(() => {
     if (!mapInstance.current || !mapState.isMapLoaded) return
@@ -160,7 +351,7 @@ const Map: React.FC = () => {
 
   // 风场图层
   useEffect(() => {
-    if (!mapInstance.current) return
+    if (!mapInstance.current || !mapState.isMapLoaded) return
 
     const handleStyleLoad = () => {
       if (mapState.showWindLayer) {
@@ -312,6 +503,19 @@ const Map: React.FC = () => {
           }))
         }
       />
+
+      {/* 加载指示器 */}
+      {isDataLoaded && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-opacity-50'>
+          <div
+            style={{
+              borderTopColor: 'transparent',
+              transform: `rotate(${Math.random() * 360}deg)`,
+            }}
+            className='h-12 w-12 animate-spin rounded-full border-4 border-orange-700/80'
+          />
+        </div>
+      )}
 
       {/* 侧边栏 */}
       <SideMenu
