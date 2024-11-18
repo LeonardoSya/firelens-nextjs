@@ -17,7 +17,7 @@ import mbxGeocoding from '@mapbox/mapbox-sdk/services/geocoding'
 import { useAppSelector } from '@/lib/hooks'
 import { RootState } from '@/lib/store'
 import SideMenu from '@/components/side-menu'
-import type { FirePoint, MapboxEvent } from '@/types/map.types'
+import { type FirePoint, MapboxEvent } from 'map-types'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
@@ -126,193 +126,194 @@ const Map: React.FC = () => {
     }
   }, [mapState.style])
 
-  // // 加载火点数据并处理交互事件
-  // const fetchData = useCallback(async () => {
-  //   try {
-  //     setIsDataLoaded(true)
-  //     if (abortControllerRef.current) {
-  //       abortControllerRef.current.abort() // 拦截上一次请求
-  //     }
-  //     abortControllerRef.current = new AbortController() // 被中断的请求会抛出AbortError
+  // 加载火点数据并处理交互事件
+  const fetchData = useCallback(async () => {
+    try {
+      setIsDataLoaded(true)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort() // 拦截上一次请求
+      }
+      abortControllerRef.current = new AbortController() // 被中断的请求会抛出AbortError
 
-  //     const bounds = map.current.getBounds()
-  //     const baseParams = {
-  //       minLat: bounds.getSouth(),
-  //       maxLat: bounds.getNorth(),
-  //       minLon: bounds.getWest(),
-  //       maxLon: bounds.getEast(),
-  //       ...filterParams,
-  //     }
+      const bounds = map.current.getBounds()
+      const baseParams = {
+        minLat: bounds.getSouth(),
+        maxLat: bounds.getNorth(),
+        minLon: bounds.getWest(),
+        maxLon: bounds.getEast(),
+        ...filterParams,
+      }
 
-  //     const queryParams = new URLSearchParams(
-  //       Object.entries(baseParams).filter(([_, value]) => value != null) as [string, string][],
-  //     ).toString()
-  //     const url = `${baseUrl}/api/global-48h-data?${queryParams}`
+      const queryParams = new URLSearchParams(
+        Object.entries(baseParams).filter(([_, value]) => value != null) as [string, string][],
+      ).toString()
+      const url = `${baseUrl}/api/global-48h-data?${queryParams}`
 
-  //     const response = await fetch(url, { signal: abortControllerRef.current.signal })
-  //     const data = await response.json()
-  //     if (!data.features || !Array.isArray(data.features)) {
-  //       console.error('Invalid data structure:', data)
-  //       return null
-  //     }
-  //     return data
-  //   } catch (error: unknown) {
-  //     if (error instanceof Error && error.name === 'AbortError') {
-  //       console.log('Request aborted')
-  //     } else {
-  //       console.error('Error fetching data:', error)
-  //     }
-  //     return null
-  //   } finally {
-  //     setIsDataLoaded(false)
-  //   }
-  // }, [filterParams])
+      const response = await fetch(url, { signal: abortControllerRef.current.signal })
+      const data = await response.json()
+      if (!data.features || !Array.isArray(data.features)) {
+        console.error('Invalid data structure:', data)
+        return null
+      }
+      return data
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request aborted')
+      } else {
+        console.error('Error fetching data:', error)
+      }
+      return null
+    } finally {
+      setIsDataLoaded(false)
+    }
+  }, [filterParams])
 
-  // // 渲染火点数据
-  // const updateData = useCallback(async () => {
-  //   const data = await fetchData()
-  //   if (!data) {
-  //     console.log('No data received')
-  //     return
-  //   }
-  //   if (map.current.getSource('firePoints')) {
-  //     // 若数据源已存在，使用setData更新数据
-  //     ;(map.current.getSource('firePoints') as mapboxgl.GeoJSONSource).setData(data)
-  //   } else {
-  //     map.current.addSource('firePoints', {
-  //       type: 'geojson',
-  //       data,
-  //     })
-  //     map.current.addLayer({
-  //       id: 'firePointsLayer',
-  //       type: 'circle',
-  //       source: 'firePoints',
-  //       paint: {
-  //         'circle-radius': 6,
-  //         'circle-color': '#e20303',
-  //         'circle-blur': 0.4,
-  //         'circle-stroke-color': '#333333',
-  //         'circle-stroke-width': 1,
-  //         'circle-stroke-opacity': 0.7,
-  //         'circle-emissive-strength': 1,
-  //       },
-  //     })
-  //     map.current.on('mouseenter', 'firePointsLayer', () => {
-  //       map.current.getCanvas().style.cursor = 'pointer'
-  //     })
-  //     map.current.on('mouseleave', 'firePointsLayer', () => {
-  //       map.current.getCanvas().style.cursor = ''
-  //     })
-  //     map.current.on('click', 'firePointsLayer', (e: MapboxEvent) => {
-  //       const feature = e.features[0]
-  //       const properties = feature.properties
-  //       const coordinates = feature.geometry.coordinates.slice()
+  // 渲染火点数据
+  const updateData = useCallback(async () => {
+    const data = await fetchData()
+    if (!data) {
+      console.log('No data received')
+      return
+    }
+    if (map.current.getSource('firePoints')) {
+      // 若数据源已存在，使用setData更新数据
+      ;(map.current.getSource('firePoints') as mapboxgl.GeoJSONSource).setData(data)
+    } else {
+      map.current.addSource('firePoints', {
+        type: 'geojson',
+        data,
+      })
+      map.current.addLayer({
+        id: 'firePointsLayer',
+        type: 'circle',
+        source: 'firePoints',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#e20303',
+          'circle-blur': 0.4,
+          'circle-stroke-color': '#333333',
+          'circle-stroke-width': 1,
+          'circle-stroke-opacity': 0.7,
+          'circle-emissive-strength': 1,
+        },
+      })
+      map.current.on('mouseenter', 'firePointsLayer', () => {
+        map.current.getCanvas().style.cursor = 'pointer'
+      })
+      map.current.on('mouseleave', 'firePointsLayer', () => {
+        map.current.getCanvas().style.cursor = ''
+      })
+      map.current.on('click', 'firePointsLayer', (e: MapboxEvent) => {
+        const feature = e.features[0]
+        const properties = feature.properties
+        const coordinates = feature.geometry.coordinates.slice()
 
-  //       const acqDate = new Date(properties.acq_date)
-  //       const hours = Math.floor(properties.acq_time / 100)
-  //       const minutes = properties.acq_time % 100
-  //       acqDate.setUTCHours(hours, minutes)
-  //       const dateTime = format(acqDate, 'yyyy-MM-dd HH:mm:ss')
+        const acqDate = new Date(properties.acq_date)
+        const hours = Math.floor(properties.acq_time / 100)
+        const minutes = properties.acq_time % 100
+        acqDate.setUTCHours(hours, minutes)
+        const dateTime = format(acqDate, 'yyyy-MM-dd HH:mm:ss')
 
-  //       setFirePoint({
-  //         loc: coordinates,
-  //         district: '',
-  //         confidence: properties.confidence,
-  //         frp: properties.frp,
-  //         bright_ti4: properties.bright_ti4,
-  //         bright_ti5: properties.bright_ti5,
-  //         daynight: properties.daynight === 'D',
-  //         dateTime: dateTime,
-  //         satellite: properties.satellite,
-  //         ndvi: properties.ndvi / 10000,
-  //       })
-  //       setFirePointId(properties.bright_ti4)
-  //       map.current.flyTo({
-  //         center: coordinates,
-  //         zoom: 9,
-  //         duration: 2000,
-  //         pitch: 30,
-  //       })
-  //     })
-  //   }
-  // }, [fetchData])
+        setFirePoint({
+          loc: coordinates,
+          district: '',
+          confidence: properties.confidence,
+          frp: properties.frp,
+          bright_ti4: properties.bright_ti4,
+          bright_ti5: properties.bright_ti5,
+          daynight: properties.daynight === 'D',
+          dateTime: dateTime,
+          satellite: properties.satellite,
+          ndvi: properties.ndvi / 10000,
+        })
+        setFirePointId(properties.bright_ti4)
+        map.current.flyTo({
+          center: coordinates,
+          zoom: 9,
+          duration: 2000,
+          pitch: 30,
+        })
+      })
+    }
+  }, [fetchData])
 
-  // const updateOnMove = useCallback(
-  //   throttle(() => {
-  //     updateData()
-  //   }, 500),
-  //   [updateData],
-  // )
+  const updateOnMove = useCallback(
+    throttle(() => {
+      updateData()
+    }, 500),
+    [updateData],
+  )
 
-  // useEffect(() => {
-  //   if (!map.current || !isMapLoaded) return
-  //   updateData()
-  //   map.current.on('moveend', updateOnMove)
-  //   map.current.on('zoomend', updateOnMove)
+  useEffect(() => {
+    if (!map.current || !isMapLoaded) return
+    updateData()
+    map.current.on('moveend', updateOnMove)
+    map.current.on('zoomend', updateOnMove)
 
-  //   return () => {
-  //     if (map.current) {
-  //       map.current.off('moveend', updateOnMove)
-  //       map.current.off('zoomend', updateOnMove)
-  //     }
-  //     if (abortControllerRef.current) {
-  //       abortControllerRef.current.abort()
-  //     }
-  //   }
-  // }, [isMapLoaded, updateData, updateOnMove])
+    return () => {
+      if (map.current) {
+        map.current.off('moveend', updateOnMove)
+        map.current.off('zoomend', updateOnMove)
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [isMapLoaded, updateData, updateOnMove])
 
-  // useEffect(() => {
-  //   if (map.current && isMapLoaded) {
-  //     updateData()
-  //   }
-  //   if (!map.current || !isMapLoaded) return
+  useEffect(() => {
+    if (map.current && isMapLoaded) {
+      updateData()
+    }
+    if (!map.current || !isMapLoaded) return
 
-  //   // 当底图样式重新加载时重新渲染数据
-  //   map.current.on('style.load', () => {
-  //     updateData()
-  //   })
-  // }, [isMapLoaded])
+    // 当底图样式重新加载时重新渲染数据
+    map.current.on('style.load', () => {
+      updateData()
+    })
+  }, [isMapLoaded])
 
-  // // 火点逆向地理编码
-  // useEffect(() => {
-  //   if (!firePoint) return
+  // 火点逆向地理编码
+  useEffect(() => {
+    if (!firePoint) return
 
-  //   const fetchDistrict = async () => {
-  //     try {
-  //       const geocodingClient = mbxGeocoding({
-  //         accessToken,
-  //       })
-  //       const response = await geocodingClient
-  //         .reverseGeocode({
-  //           query: firePoint.loc,
-  //           limit: 1,
-  //           language: ['zh'],
-  //         })
-  //         .send()
+    const fetchDistrict = async () => {
+      try {
+        const geocodingClient = mbxGeocoding({
+          accessToken,
+        })
+        const response = await geocodingClient
+          .reverseGeocode({
+            query: firePoint.loc,
+            limit: 1,
+            language: ['zh'],
+          })
+          .send()
 
-  //       const match = response.body.features[0]
-  //       if (match) {
-  //         const { context = [] } = match
-  //         const getText = (idPart: string) =>
-  //           context.find((c: { id: string | string[] }) => c.id.includes(idPart))?.text || ''
-  //         const country = getText('country')
-  //         const province = getText('region')
-  //         const city = getText('place')
-  //         const locality = getText('locality')
-  //         setFirePoint(prev => ({
-  //           ...prev,
-  //           district: `${country} ${province} ${city}${locality}`,
-  //         }))
-  //       }
-  //     } catch (error) {
-  //       console.error('Reverse Geocoding Error: ', error)
-  //     }
-  //   }
+        const match = response.body.features[0]
+        if (match) {
+          const { context = [] } = match
+          const getText = (idPart: string) =>
+            context.find((c: { id: string | string[] }) => c.id.includes(idPart))?.text || ''
+          const country = getText('country')
+          const province = getText('region')
+          const city = getText('place')
+          const locality = getText('locality')
+          setFirePoint(prev => ({
+            ...prev,
+            district: `${country} ${province} ${city}${locality}`,
+          }))
+        }
+      } catch (error) {
+        console.error('Reverse Geocoding Error: ', error)
+      }
+    }
 
-  //   fetchDistrict()
-  // }, [firePoint])
+    fetchDistrict()
+  }, [firePoint])
 
   // 风场图层切换
+
   useEffect(() => {
     if (!map.current || !mapState.isMapLoaded) return
 
