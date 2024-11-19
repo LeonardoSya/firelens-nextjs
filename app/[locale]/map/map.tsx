@@ -19,6 +19,7 @@ import { RootState } from '@/lib/store'
 import { type FirePoint, MapboxEvent } from 'map-types'
 import { format } from 'date-fns'
 import { throttle } from 'lodash'
+import { AnimatePresence, motion } from 'framer-motion'
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
@@ -168,9 +169,8 @@ const Map: React.FC = () => {
         maxLon: bounds.getEast(),
         ...filterParams,
       }
-
       const queryParams = new URLSearchParams(
-        Object.entries(baseParams).filter(([_, value]) => value != null) as [string, string][],
+        Object.entries(baseParams).filter(([value]) => value != null) as [string, string][],
       ).toString()
 
       const resData = await fetch(`/api/map?${queryParams}`, {
@@ -194,7 +194,6 @@ const Map: React.FC = () => {
   // 渲染火点数据
   const renderData = useCallback(async () => {
     const data = await fetchData()
-    console.log(data)
     if (!data) {
       console.log('No data received')
       return
@@ -490,6 +489,7 @@ const Map: React.FC = () => {
 
   return (
     <>
+      {/* 地图及控件 */}
       <div ref={mapContainer} className='left-0 h-screen w-screen' />
       <button
         className='absolute left-0 top-32 z-50 h-24 w-24 cursor-pointer'
@@ -503,6 +503,67 @@ const Map: React.FC = () => {
           }))
         }
       />
+
+      {/* 火点信息弹窗 */}
+      <AnimatePresence>
+        {showFirePointId !== 0 && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 0 }}
+            className='absolute right-0 md:right-32 top-1/2 z-10 max-w-96 transform rounded-xl bg-white bg-opacity-85 p-6 duration-100 dark:bg-gray-950 dark:bg-opacity-80'
+          >
+            <div
+              onClick={() => setShowFirePointId(0)}
+              className='absolute right-2 top-2 transform cursor-pointer text-gray-900 duration-150 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            >
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-auto' viewBox='0 0 512 512'>
+                <path
+                  fill='none'
+                  stroke='currentColor'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='32'
+                  d='M368 368L144 144M368 144L144 368'
+                />
+              </svg>
+            </div>
+            <motion.ul
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
+              initial='hidden'
+              animate='visible'
+              exit='hidden'
+              className='space-y-1 font-semibold text-gray-950 dark:text-gray-400'
+            >
+              {[
+                `受灾地区：${firePoint.district}`,
+                `火点地理坐标：${firePoint.loc.map(c => c.toFixed(2)).join(', ')}`,
+                `火点置信度：${firePoint.confidence}`,
+                `Ti4通道亮温 (开尔文)：${firePoint.bright_ti4}`,
+                `Ti5通道亮温 (开尔文)：${firePoint.bright_ti5}`,
+                `火灾辐射功率 (兆瓦)：${firePoint.frp}`,
+                `受灾区域 NDVI：${firePoint.ndvi}`,
+                `受灾时间：${firePoint.dateTime}`,
+                `受灾时段：${firePoint.daynight ? '白天' : '夜晚'}`,
+                `监测卫星：${firePoint.satellite}`,
+                `数据来源：VIIRS 375m / NOAA-21`,
+              ].map((item, index) => (
+                <motion.li
+                  key={index}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                    exit: { opacity: 0, y: 20 },
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {item}
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 加载指示器 */}
       {isDataLoaded && (
