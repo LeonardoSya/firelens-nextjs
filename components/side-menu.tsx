@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
-import { setFilterParams } from '@/features/filter-slice'
+import { setFilterParams } from '@/redux/filter-slice'
 import { RootState } from '@/lib/store'
 import RangeInput from '@/components/range-input'
 import { useState, useEffect } from 'react'
