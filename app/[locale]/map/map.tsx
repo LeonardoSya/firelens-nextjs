@@ -198,69 +198,67 @@ const Map: React.FC = () => {
       console.log('No data received')
       return
     }
-    mapInstance.current.on('load', () => {
-      if (mapInstance.current.getSource('fire_points')) {
-        // 若数据源已存在，直接使用setData更新数据
-        ;(mapInstance.current.getSource('fire_points') as mapboxgl.GeoJSONSource).setData(data)
-      } else {
-        mapInstance.current.addSource('fire_points', {
-          type: 'geojson',
-          data,
-        })
+    if (mapInstance.current.getSource('fire_points')) {
+      // 若数据源已存在，直接使用setData更新数据
+      ;(mapInstance.current.getSource('fire_points') as mapboxgl.GeoJSONSource).setData(data)
+    } else {
+      mapInstance.current.addSource('fire_points', {
+        type: 'geojson',
+        data,
+      })
 
-        mapInstance.current.addLayer({
-          id: 'fire_points_layer',
-          type: 'circle',
-          source: 'fire_points',
-          paint: {
-            'circle-radius': 6,
-            'circle-color': '#e20303',
-            'circle-blur': 0.4,
-            'circle-stroke-color': '#333333',
-            'circle-stroke-width': 1,
-            'circle-stroke-opacity': 0.7,
-            'circle-emissive-strength': 1,
-          },
-        })
-        // 鼠标事件
-        mapInstance.current.on('mouseenter', 'fire_points_layer', () => {
-          mapInstance.current.getCanvas().style.cursor = 'pointer'
-        })
-        mapInstance.current.on('mouseleave', 'fire_points_layer', () => {
-          mapInstance.current.getCanvas().style.cursor = ''
-        })
-        mapInstance.current.on('click', 'fire_points_layer', (e: MapboxEvent) => {
-          const feature = e.features[0]
-          const properties = feature.properties
-          const coordinates = feature.geometry.coordinates.slice()
-          const acqDate = new Date(properties.acq_date)
-          const hours = Math.floor(properties.acq_time / 100)
-          const minutes = properties.acq_time % 100
-          acqDate.setUTCHours(hours, minutes)
-          const dateTime = format(acqDate, 'yyyy-MM-dd HH:mm:ss')
+      mapInstance.current.addLayer({
+        id: 'fire_points_layer',
+        type: 'circle',
+        source: 'fire_points',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#e20303',
+          'circle-blur': 0.4,
+          'circle-stroke-color': '#333333',
+          'circle-stroke-width': 1,
+          'circle-stroke-opacity': 0.7,
+          'circle-emissive-strength': 1,
+        },
+      })
+      // 鼠标事件
+      mapInstance.current.on('mouseenter', 'fire_points_layer', () => {
+        mapInstance.current.getCanvas().style.cursor = 'pointer'
+      })
+      mapInstance.current.on('mouseleave', 'fire_points_layer', () => {
+        mapInstance.current.getCanvas().style.cursor = ''
+      })
+      mapInstance.current.on('click', 'fire_points_layer', (e: MapboxEvent) => {
+        const feature = e.features[0]
+        const properties = feature.properties
+        const coordinates = feature.geometry.coordinates.slice()
+        const acqDate = new Date(properties.acq_date)
+        const hours = Math.floor(properties.acq_time / 100)
+        const minutes = properties.acq_time % 100
+        acqDate.setUTCHours(hours, minutes)
+        const dateTime = format(acqDate, 'yyyy-MM-dd HH:mm:ss')
 
-          setFirePoint({
-            loc: coordinates,
-            district: '',
-            confidence: properties.confidence,
-            frp: properties.frp,
-            bright_ti4: properties.bright_ti4,
-            bright_ti5: properties.bright_ti5,
-            daynight: properties.daynight === 'D',
-            dateTime: dateTime,
-            satellite: properties.satellite,
-            ndvi: properties.ndvi / 10000,
-          })
-          setShowFirePointId(properties.bright_ti4)
-          mapInstance.current.flyTo({
-            center: coordinates as [number, number],
-            zoom: 9,
-            duration: 2000,
-            pitch: 30,
-          })
+        setFirePoint({
+          loc: coordinates,
+          district: '',
+          confidence: properties.confidence,
+          frp: properties.frp,
+          bright_ti4: properties.bright_ti4,
+          bright_ti5: properties.bright_ti5,
+          daynight: properties.daynight === 'D',
+          dateTime: dateTime,
+          satellite: properties.satellite,
+          ndvi: properties.ndvi / 10000,
         })
-      }
-    })
+        setShowFirePointId(properties.bright_ti4)
+        mapInstance.current.flyTo({
+          center: coordinates as [number, number],
+          zoom: 9,
+          duration: 2000,
+          pitch: 30,
+        })
+      })
+    }
   }, [fetchData])
 
   const updateOnMove = useCallback(
