@@ -12,7 +12,8 @@ export async function GET(request: Request) {
 
     const query = sql`
       select * from fire_points
-      where bright_ti4 >= (select percentile_disc(0.99) within group(order by bright_ti4) from fire_points)
+      where bright_ti4 >= (select percentile_disc(0.7) within group(order by bright_ti4) from fire_points)
+      and fire_points.ndvi between 3000 and 10000
       and latitude >= ${minLat} and latitude <= ${maxLat} and longitude >= ${minLon} and longitude <= ${maxLon}
     `
 

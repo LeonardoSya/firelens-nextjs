@@ -26,6 +26,7 @@ const nextConfig = {
     domains: ['localhost'],
   },
   reactStrictMode: false,
+  output: 'standalone',
 }
 
 export default withNextIntl(nextConfig)
