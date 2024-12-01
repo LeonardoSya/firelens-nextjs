@@ -41,8 +41,9 @@ npm run start
 - Vercel Postgres
 
 ## ✨ Features
-![image](https://github.com/user-attachments/assets/4633ec65-d645-47cd-9718-bd7abee0f82c)
+![image](https://github.com/user-attachments/assets/481e4600-08f5-4ca0-9f5b-cfb10edfffc2)
+![image](https://github.com/user-attachments/assets/bd9e1cb9-333f-4a5f-86b7-fa54da8ab6e3)
+![image](https://github.com/user-attachments/assets/53fd5ab6-4e08-4c12-b62e-5f428a527993)
+![image](https://github.com/user-attachments/assets/6e5af6a3-897f-4aa8-9530-18dfe35f91da)
 ![image](https://github.com/user-attachments/assets/30329d72-46b3-4acb-94fb-8885ad45f947)
 ![image](https://github.com/user-attachments/assets/74e66908-f0e3-4393-b93c-4c8b4151033e)
-
-
