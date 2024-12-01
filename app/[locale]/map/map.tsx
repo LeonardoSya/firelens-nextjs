@@ -297,16 +297,17 @@ const Map: React.FC = () => {
     })
   }, [mapState.isMapLoaded])
 
-  // 火点数据逆向地理编码
+  // 逆向地理编码
   useEffect(() => {
-    if (!firePoint) return
+    if (!firePoint?.loc) return
 
-    const getDistrict = () => {
+    const getDistrict = async () => {
       try {
         const geocodingClient = mbxGeocoding({ accessToken })
-        const res = geocodingClient
+        const res = await geocodingClient
           .reverseGeocode({ query: firePoint.loc, limit: 1, language: ['zh'] })
           .send()
+
         const match = res.body.features[0]
         if (match) {
           const { context = [] } = match
@@ -327,7 +328,7 @@ const Map: React.FC = () => {
     }
 
     getDistrict()
-  }, [firePoint])
+  }, [firePoint?.loc])
 
   // 底图切换
   useEffect(() => {

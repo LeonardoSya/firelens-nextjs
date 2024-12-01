@@ -16,15 +16,11 @@
     "@formatjs/intl-pluralrules": "^5.2.16",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@mapbox/mapbox-sdk": "^0.16.1",
-    "@react-three/drei": "^9.43.3",
-    "@react-three/fiber": "^8.9.1",
     "@reduxjs/toolkit": "^2.3.0",
     "@types/mapbox-gl": "^3.4.0",
     "@types/pg": "^8.11.10",
     "@vercel/postgres": "^0.10.0",
     "css-doodle": "^0.40.8",
-    "csv-parser": "^3.0.0",
-    "csv-writer": "^1.6.0",
     "date-fns": "^4.1.0",
     "deck.gl": "^9.0.33",
     "framer-motion": "^11.11.9",
@@ -41,7 +37,6 @@
     "react-slick": "^0.30.2",
     "slick-carousel": "^1.8.1",
     "swr": "^2.2.5",
-    "three": "^0.169.0",
     "web-vitals": "^4.2.3"
   },
   "devDependencies": {
