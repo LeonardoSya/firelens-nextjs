@@ -33,11 +33,11 @@ export default function Navigation({ isOpen }: { isOpen: boolean }) {
           <Link href='/map'>{t('tab2')}</Link>
         </motion.li>
         <motion.li className='transform rounded-lg px-3 py-3 text-lg tracking-widest text-slate-950 duration-75 active:bg-slate-100 dark:font-semibold dark:text-neutral-200 dark:active:bg-gray-900'>
-          <Link href='/'>{t('tab3')}</Link>
+          <Link href='https://github.com/LeonardoSya/firelens-nextjs'>{t('tab3')}</Link>
         </motion.li>
         <div className='mx-3 my-2 border-t-2 dark:border-orange-700/80' />
         <motion.li className='transform rounded-lg px-3 py-3 text-lg tracking-widest text-slate-950 duration-75 active:bg-slate-100 dark:font-semibold dark:text-neutral-200 dark:active:bg-gray-900'>
-          <Link href='/'>{t('signIn')}</Link>
+          <Link href='/map'>{t('signIn')}</Link>
         </motion.li>
       </motion.ul>
     </>

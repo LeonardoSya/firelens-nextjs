@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ul className='grid grid-cols-1 sm:grid-cols-2'>
               <a
                 target='blank'
-                href='https://github.com/LeonardoSya/Firelens-System'
+                href='https://github.com/LeonardoSya/firelens-nextjs'
                 className='transform border-gray-800 duration-75 even:border-y hover:bg-gray-900 sm:py-6 sm:odd:border-y sm:odd:border-r'
               >
                 <li className='my-auto p-5 font-tiny text-3xl font-bold tracking-wide text-white sm:px-6 md:text-4xl lg:px-8'>
@@ -279,7 +279,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     {t('tab2')}
                   </MotionLink>
                   <MotionLink
-                    href='/'
+                    href='https://github.com/LeonardoSya/firelens-nextjs'
                     variants={itemVariants}
                     className='inline-block transform cursor-pointer rounded-lg px-2 py-1 tracking-widest text-slate-700 duration-75 hover:bg-slate-100 focus-visible:outline-none focus-visible:outline-1 focus-visible:outline-slate-400 dark:font-semibold dark:text-slate-300 dark:hover:bg-gray-950 dark:hover:text-white'
                   >
@@ -290,7 +290,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className='flex items-center gap-x-5 md:gap-x-8'>
                 <motion.div className='hidden md:block' variants={itemVariants}>
                   <MotionLink
-                    href='/'
+                    href='/map'
                     className='inline-block transform cursor-pointer rounded-lg px-2 py-1 tracking-widest text-slate-700 duration-75 hover:bg-slate-100 focus-visible:outline-none focus-visible:outline-1 focus-visible:outline-slate-400 dark:font-semibold dark:text-slate-300 dark:hover:bg-neutral-950 dark:hover:text-white'
                   >
                     {t('signIn')}

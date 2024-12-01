@@ -1,8 +1,8 @@
 {
   "root": {
-    "tab1": "产品介绍",
-    "tab2": "热点平台",
-    "tab3": "开发文档",
+    "tab1": "项目首页",
+    "tab2": "可视化平台",
+    "tab3": "GitHub",
     "signIn": "登录",
     "getStart": {
       "short": "体验",

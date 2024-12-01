@@ -1,8 +1,8 @@
 {
   "root": {
-    "tab1": "Introduction",
+    "tab1": "HomePage",
     "tab2": "Platform",
-    "tab3": "Docs",
+    "tab3": "GitHub",
     "signIn": "Sign In",
     "getStart": {
       "short": "Get Started",
