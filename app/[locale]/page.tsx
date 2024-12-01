@@ -5,10 +5,8 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-// import { Canvas } from '@react-three/fiber'
 import { motion } from 'framer-motion'
 import Slider from 'react-slick'
-// import Earth from '@/components/earth'
 import mapImg from '@/public/img/map.png'
 import mapSatellite from '@/public/img/map-satellite.png'
 import mapCity from '@/public/img/map-city.png'
@@ -121,11 +119,6 @@ const HomePage: React.FC = () => {
       <div className='g-bg absolute h-full w-full overflow-hidden'>
         <CssDoodleComponent />
       </div>
-      {/* <div className='earth absolute left-0 top-0 z-0 h-full w-full'>
-        <Canvas>
-          <Earth />
-        </Canvas>
-      </div> */}
       <div className='relative z-10 mx-auto max-w-7xl px-6 pt-24 sm:pt-32 md:pt-56 lg:px-8'>
         <div className='mx-auto max-w-2xl items-center justify-between lg:flex lg:max-w-none'>
           <motion.div

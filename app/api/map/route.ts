@@ -9,12 +9,21 @@ export async function GET(request: Request) {
     const maxLat = parseFloat(queryParams.get('maxLat')) ?? 90
     const minLon = parseFloat(queryParams.get('minLon')) ?? -180
     const maxLon = parseFloat(queryParams.get('maxLon')) ?? 180
+    const minBrightTi4 = parseFloat(queryParams.get('minBrightTi4')) || 0
+    const maxBrightTi4 = parseFloat(queryParams.get('maxBrightTi4')) || 10000
+    const minBrightTi5 = parseFloat(queryParams.get('minBrightTi5')) || 0
+    const maxBrightTi5 = parseFloat(queryParams.get('maxBrightTi5')) || 10000
+    const minFrp = parseFloat(queryParams.get('minFrp')) || 0
+    const maxFrp = parseFloat(queryParams.get('maxFrp')) || 10000
 
     const query = sql`
       select * from fire_points
       where bright_ti4 >= (select percentile_disc(0.7) within group(order by bright_ti4) from fire_points)
       and fire_points.ndvi between 3000 and 10000
       and latitude >= ${minLat} and latitude <= ${maxLat} and longitude >= ${minLon} and longitude <= ${maxLon}
+      and frp between ${minFrp} and ${maxFrp}
+      and bright_ti4 between ${minBrightTi4} and ${maxBrightTi4}
+      and bright_ti5 between ${minBrightTi5} and ${maxBrightTi5}
     `
 
     const resData = await query

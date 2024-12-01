@@ -6,8 +6,8 @@ interface RangeInputProps {
   maxValue: number | null;
   defaultMinValue: number;
   defaultMaxValue: number;
-  onMinChange: (value: string) => void;
-  onMaxChange: (value: string) => void;
+  onMinChange: (value: number) => void;
+  onMaxChange: (value: number) => void;
 }
 
 const RangeInput: React.FC<RangeInputProps> = (props: RangeInputProps) => {
@@ -21,7 +21,7 @@ const RangeInput: React.FC<RangeInputProps> = (props: RangeInputProps) => {
           type='number'
           className='w-20 rounded-md border border-gray-800 bg-white px-2 py-1 text-sm [appearance:textfield] focus:border-gray-800 focus:outline-none focus:ring-0 dark:border-gray-800 dark:bg-gray-800 dark:text-white [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
           value={minValue}
-          onChange={e => onMinChange(e.target.value)}
+          onChange={e => onMinChange(Number(e.target.value))}
           placeholder={defaultMinValue.toString()}
         />
         <span>-</span>
@@ -29,7 +29,7 @@ const RangeInput: React.FC<RangeInputProps> = (props: RangeInputProps) => {
           type='number'
           className='w-20 rounded-md border border-gray-800 bg-white px-2 py-1 text-sm [appearance:textfield] focus:border-gray-800 focus:outline-none focus:ring-0 dark:border-gray-800 dark:bg-gray-800 dark:text-white [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
           value={maxValue}
-          onChange={e => onMaxChange(e.target.value)}
+          onChange={e => onMaxChange(Number(e.target.value))}
           placeholder={defaultMaxValue.toString()}
         />
       </div>
