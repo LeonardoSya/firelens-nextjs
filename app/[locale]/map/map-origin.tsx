@@ -109,7 +109,7 @@ const Map: React.FC = () => {
       map.current?.remove()
       map.current = null
     }
-  }, [])
+  }, [mapState.style])
 
   // 监听style更新底图样式
   useEffect(() => {
@@ -124,7 +124,7 @@ const Map: React.FC = () => {
         }
       })
     }
-  }, [mapState.style])
+  }, [mapState.isMapLoaded, mapState.style])
 
   // 加载火点数据并处理交互事件
   const fetchData = useCallback(async () => {
@@ -145,7 +145,7 @@ const Map: React.FC = () => {
       }
 
       const queryParams = new URLSearchParams(
-        Object.entries(baseParams).filter(([_, value]) => value != null) as [string, string][],
+        Object.entries(baseParams).filter(([value]) => value != null) as [string, string][],
       ).toString()
       const url = `${baseUrl}/api/global-48h-data?${queryParams}`
 
@@ -245,7 +245,7 @@ const Map: React.FC = () => {
   )
 
   useEffect(() => {
-    if (!map.current || !isMapLoaded) return
+    if (!map.current || !mapState.isMapLoaded) return
     updateData()
     map.current.on('moveend', updateOnMove)
     map.current.on('zoomend', updateOnMove)
@@ -259,19 +259,19 @@ const Map: React.FC = () => {
         abortControllerRef.current.abort()
       }
     }
-  }, [isMapLoaded, updateData, updateOnMove])
+  }, [mapState.isMapLoaded, updateData, updateOnMove])
 
   useEffect(() => {
-    if (map.current && isMapLoaded) {
+    if (map.current && mapState.isMapLoaded) {
       updateData()
     }
-    if (!map.current || !isMapLoaded) return
+    if (!map.current || !mapState.isMapLoaded) return
 
     // 当底图样式重新加载时重新渲染数据
     map.current.on('style.load', () => {
       updateData()
     })
-  }, [isMapLoaded])
+  }, [mapState.isMapLoaded, updateData])
 
   // 火点逆向地理编码
   useEffect(() => {
@@ -313,7 +313,6 @@ const Map: React.FC = () => {
   }, [firePoint])
 
   // 风场图层切换
-
   useEffect(() => {
     if (!map.current || !mapState.isMapLoaded) return
 
@@ -451,7 +450,7 @@ const Map: React.FC = () => {
         map.current.off('style.load', handleStyleLoad)
       }
     }
-  }, [mapState.showWindLayer])
+  }, [mapState.isMapLoaded, mapState.showWindLayer])
 
   return (
     <>
