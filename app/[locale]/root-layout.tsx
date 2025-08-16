@@ -24,7 +24,6 @@ const itemVariants = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false)
   const [headerAnimation, setHeaderAnimation] = useState({ y: 0 })
-  const [isScrolled, setIsScrolled] = useState(false)
 
   const dispatch = useAppDispatch()
   const isOpen = useAppSelector(state => state.menu.isOpen)
@@ -41,14 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     setHeaderAnimation(isHeaderCollapsed ? { y: 570 } : { y: 0 })
   }, [isHeaderCollapsed])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   return (
     <div className='bg-neutral-950 pt-6 dark:bg-gray-900'>

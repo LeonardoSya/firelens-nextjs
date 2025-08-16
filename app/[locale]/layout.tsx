@@ -24,9 +24,9 @@ export default async function Layout({
   params: { locale },
 }: {
   children: React.ReactNode
-  params: { locale: string }
+  params: { locale: 'en' | 'zh' }
 }) {
-  if (!routing.locales.includes(locale as any)) notFound()
+  if (!routing.locales.includes(locale)) notFound()
 
   const messages = await getMessages()
 
