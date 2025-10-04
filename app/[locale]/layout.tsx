@@ -34,7 +34,15 @@ export default async function Layout({
     <html lang={locale} className={`dark ${anton.variable} ${montserrat.variable} ${tiny5.variable}`}>
       <head>
         <link rel='icon' type='image/png' href='/favicon.png' />
-        <link href='https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css' rel='stylesheet' />
+        
+        {/* 预连接外部域名 */}
+        <link rel="preconnect" href="https://api.mapbox.com" />
+        <link rel="preconnect" href="https://unpkg.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Mapbox CSS - 直接加载但优先级较低 */}
+        <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet" />
       </head>
       <body>
         <Providers>
