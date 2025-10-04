@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     FIRELENS
                   </h2>
                   <h4 className='hidden font-serif text-lg text-white md:block'>
-                    system created by LeonardoSya
+                    system created by yiyangzhang
                   </h4>
                 </div>
               </div>

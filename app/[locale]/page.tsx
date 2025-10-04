@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,23 +16,27 @@ import fireIcon from '@/public/img/fire-icon.png'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 import '@/app/styles/bg.css'
-import 'css-doodle'
 
 const LazyHeatMap = dynamic(() => import('@/components/charts/heat-pg'), {
   ssr: false,
-  loading: () => <div>加载中...</div>,
+  loading: () => <ChartSkeleton className="h-96 md:h-[36rem] md:w-3/4" />,
 })
 const LazyAreaScatter = dynamic(() => import('@/components/charts/area'), {
   ssr: false,
-  loading: () => <div>加载中...</div>,
+  loading: () => <ChartSkeleton className="flex-1 h-64" />,
 })
 const LazyTimeScatter = dynamic(() => import('@/components/charts/time'), {
   ssr: false,
-  loading: () => <div>加载中...</div>,
+  loading: () => <ChartSkeleton className="h-96 md:h-[40rem] md:w-3/4" />,
 })
 const LazyCountryPie = dynamic(() => import('@/components/charts/pie'), {
   ssr: false,
-  loading: () => <div>加载中...</div>,
+  loading: () => <ChartSkeleton className="flex-1 h-64" />,
+})
+
+const LazyBackgroundAnimation = dynamic(() => import('./components/BackgroundAnimation').then(mod => ({ default: mod.default })), {
+  ssr: false,
+  loading: () => <div className="absolute h-full w-full" />,
 })
 
 const settings = {
@@ -47,77 +51,62 @@ const settings = {
 }
 
 const images = [
-  { src: mapImg, alt: 'map' },
+  // priority: 首图优先加载
+  { src: mapImg, alt: 'map', priority: true },
   { src: mapSatellite, alt: 'satellite' },
   { src: mapWind, alt: 'wind' },
   { src: mapCity, alt: 'city' },
   { src: mapMobile, alt: 'mobile' },
 ]
 
+const ChartSkeleton = ({ className }: { className?: string }) => (
+  <div className={`bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse ${className}`}>
+    <div className="flex items-center justify-center h-full">
+      <div className="text-gray-400 dark:text-gray-500">loading...</div>
+    </div>
+  </div>
+)
+
+const OptimizedBackground = () => (
+  <div className="absolute inset-0 overflow-hidden">
+    <div className="animate-float-slow absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-full blur-2xl" />
+    <div className="animate-float-medium absolute top-3/4 right-1/4 w-24 h-24 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl" />
+    <div className="animate-float-fast absolute top-1/2 left-3/4 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-xl" />
+  </div>
+)
+
 const MotionLink = motion.create(Link)
 
-const CssDoodleComponent = () => {
-  const doodleRef = useRef(null)
 
-  return (
-    <div
-      ref={doodleRef}
-      dangerouslySetInnerHTML={{
-        __html: `
-          <css-doodle>
-            :doodle {
-              @grid: 1x20 / 100vmin;
-            }
-            @place-cell: center;
-            width: @rand(60vmin, 100vmin);
-            height: @rand(60vmin, 100vmin);
-            transform: translate(@rand(-120%, 120%), @rand(-80%, 80%)) scale(@rand(.8, 2.8)) skew(@rand(45deg));
-            clip-path: polygon(
-              @r(0, 30%) @r(0, 50%), 
-              @r(30%, 60%) @r(0%, 30%), 
-              @r(60%, 100%) @r(0%, 50%), 
-              @r(60%, 100%) @r(50%, 100%), 
-              @r(30%, 60%) @r(60%, 100%),
-              @r(0, 30%) @r(60%, 100%)
-            );
-            background: @pick(#f44336, #e91e63, #9c27b0, #673ab7, #3f51b5, #60569e, #e6437d, #ebbf4d, #00bcd4, #03a9f4, #2196f3, #009688, #5ee463, #f8e645, #ffc107, #ff5722, #43f8bf, #e136eb, #f57c23, #32ed39);
-            opacity: @rand(.3, .6);
-            position: relative;
-            top: @rand(-80%, 80%);
-            left: @rand(-80%, 80%);
-            animation: colorChange @rand(6.1s, 26.1s) infinite @rand(-.5s, -2.5s) linear alternate;
-            @keyframes colorChange {
-              100% {
-                left: 0;
-                top: 0;
-                filter: hue-rotate(360deg);
-              }
-            }
-            position: relative;
-            top: @rand(-80%, 80%);
-            left: @rand(-80%, 80%);
-            animation: colorChange @rand(6.1s, 16.1s) infinite @rand(-.5s, -2.5s) linear alternate;
-            @keyframes colorChange {
-              100% {
-                left: 0;
-                top: 0;
-                filter: hue-rotate(360deg);
-              } 
-            }
-          </css-doodle>
-        `,
-      }}
-    />
-  )
-}
 
 const HomePage: React.FC = () => {
   const t = useTranslations()
+  const [showCharts, setShowCharts] = useState(false)
+  const [showBackground, setShowBackground] = useState(false)
+
+  // 分阶段渲染：首屏渲染完成后再加载图表和背景动画
+  useEffect(() => {
+    // 延迟加载背景动画
+    const backgroundTimer = setTimeout(() => setShowBackground(true), 500)
+    // 延迟加载图表组件
+    const chartsTimer = setTimeout(() => setShowCharts(true), 1000)
+
+    return () => {
+      clearTimeout(backgroundTimer)
+      clearTimeout(chartsTimer)
+    }
+  }, [])
 
   return (
     <main className='relative h-screen w-full'>
       <div className='g-bg absolute h-full w-full overflow-hidden'>
-        <CssDoodleComponent />
+        {showBackground ? (
+          <Suspense fallback={<div className="absolute h-full w-full" />}>
+            <LazyBackgroundAnimation />
+          </Suspense>
+        ) : (
+          <OptimizedBackground />
+        )}
       </div>
       <div className='relative z-10 mx-auto max-w-7xl px-6 pt-24 sm:pt-32 md:pt-56 lg:px-8'>
         <div className='mx-auto max-w-2xl items-center justify-between lg:flex lg:max-w-none'>
@@ -165,6 +154,11 @@ const HomePage: React.FC = () => {
                   <Image
                     src={image.src}
                     alt={image.alt}
+                    width={480}
+                    height={320}
+                    priority={image.priority || false}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                     className='h-72 w-full rounded-2xl object-cover lg:h-full'
                   />
                 </div>
@@ -243,10 +237,29 @@ const HomePage: React.FC = () => {
             <p className='mt-6 font-montserrat tracking-wider text-neutral-400'>
               全球48h内特大火灾发生时间与火点亮温图
             </p>
-            <LazyTimeScatter />
+            {showCharts ? (
+              <Suspense fallback={<ChartSkeleton className="h-96 md:h-[40rem] md:w-3/4" />}>
+                <LazyTimeScatter />
+              </Suspense>
+            ) : (
+              <ChartSkeleton className="h-96 md:h-[40rem] md:w-3/4" />
+            )}
             <div className='mt-12 flex w-full flex-col gap-4 lg:max-w-5xl lg:flex-row'>
-              <LazyCountryPie />
-              <LazyAreaScatter />
+              {showCharts ? (
+                <>
+                  <Suspense fallback={<ChartSkeleton className="flex-1 h-64" />}>
+                    <LazyCountryPie />
+                  </Suspense>
+                  <Suspense fallback={<ChartSkeleton className="flex-1 h-64" />}>
+                    <LazyAreaScatter />
+                  </Suspense>
+                </>
+              ) : (
+                <>
+                  <ChartSkeleton className="flex-1 h-64" />
+                  <ChartSkeleton className="flex-1 h-64" />
+                </>
+              )}
             </div>
           </motion.div>
           <motion.div
@@ -272,7 +285,13 @@ const HomePage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
             className='flex flex-col items-center justify-center'
           >
-            <LazyHeatMap />
+            {showCharts ? (
+              <Suspense fallback={<ChartSkeleton className="h-96 md:h-[36rem] md:w-3/4" />}>
+                <LazyHeatMap />
+              </Suspense>
+            ) : (
+              <ChartSkeleton className="h-96 md:h-[36rem] md:w-3/4" />
+            )}
           </motion.div>
         </div>
       </div>
