@@ -14,6 +14,7 @@ import mbxGeocoding from '@mapbox/mapbox-sdk/services/geocoding'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import SideMenu from '@/components/side-menu'
+import Chat from '@/components/ai/chat'
 import { useAppSelector } from '@/lib/hooks'
 import { RootState } from '@/lib/store'
 import { type FirePoint, MapboxEvent } from 'map-types'
@@ -586,6 +587,7 @@ const Map: React.FC = () => {
           setMapState(prev => ({ ...prev, showWindLayer: !prev.showWindLayer }))
         }}
       />
+      <Chat />
     </>
   )
 }
