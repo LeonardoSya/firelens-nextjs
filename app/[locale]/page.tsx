@@ -34,7 +34,7 @@ const LazyCountryPie = dynamic(() => import('@/components/charts/pie'), {
   loading: () => <ChartSkeleton className="flex-1 h-64" />,
 })
 
-const LazyBackgroundAnimation = dynamic(() => import('./components/BackgroundAnimation').then(mod => ({ default: mod.default })), {
+const LazyBackgroundAnimation = dynamic(() => import('../../components/background-animation').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => <div className="absolute h-full w-full" />,
 })

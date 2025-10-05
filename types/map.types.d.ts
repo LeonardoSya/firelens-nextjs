@@ -17,7 +17,7 @@ declare module 'map-types' {
   }
 
   export interface Feature {
-    id: number
+    id: string | number
     type: 'Feature'
     geometry: {
       geodesic: boolean

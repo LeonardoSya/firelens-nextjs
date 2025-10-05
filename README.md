@@ -6,7 +6,7 @@
 ## 🚀 Getting Started
 [![My Skills](https://skillicons.dev/icons?i=nodejs,pnpm)](https://skillicons.dev)
 - Node.js >=18.x
-- pnpm >=9
+- pnpm >=10.x
 ```bash
 git clone https://github.com/LeonardoSya/firelens-nextjs
 cd firelens-nextjs
