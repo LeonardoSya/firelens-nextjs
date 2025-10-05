@@ -4,13 +4,13 @@
 </p>
 
 ## 🚀 Getting Started
-[![My Skills](https://skillicons.dev/icons?i=nodejs,npm,yarn)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=nodejs,pnpm)](https://skillicons.dev)
 - Node.js >=18.x
-- npm or yarn
+- pnpm >=9
 ```bash
 git clone https://github.com/LeonardoSya/firelens-nextjs
 cd firelens-nextjs
-npm install
+pnpm install
 ```
 👋 Create a .env.local file in the root directory and add your [Mapbox](https://www.mapbox.com/) token like this:
 ```bash
@@ -20,12 +20,12 @@ NEXT_PUBLIC_MAPBOX_TOKEN=[your_mapbox_token]
 🤩 Then you can start firelens
 ```bash
 # Run development server
-npm run dev
+pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 # Start production server
-npm run start
+pnpm start
 ```
 
 ## 🛠️ Technology Stack

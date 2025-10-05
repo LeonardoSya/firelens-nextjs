@@ -6,9 +6,8 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": [
-        "run",
         "dev"
       ],
       "console": "integratedTerminal",
