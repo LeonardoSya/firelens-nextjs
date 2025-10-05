@@ -7,9 +7,16 @@ interface Msg {
   content: string;
 }
 
-interface IProps {}
+interface DifyTextChunkEvent {
+  event: 'text_chunk',
+  data: {
+    text: string;
+  }
+  workflow_run_id:string
+  task_id: string;
+}
 
-const Chat: React.FC<IProps> = () => {
+const Chat: React.FC = () => {
   const [msgs, setMsgs] = useState<Msg[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -42,30 +49,37 @@ const Chat: React.FC<IProps> = () => {
       const reader = res.body.getReader()
       const decoder = new TextDecoder('utf-8')
 
-      // stream
+      let buffer = ''
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        const chunk = decoder.decode(value, { stream: true })
+        buffer += decoder.decode(value, { stream: true })
+        const boundary = '\n\n'
 
-        const lines = chunk.split('\n')
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
+        while (buffer.includes(boundary)) {
+          const completeMsg = buffer.substring(0, buffer.indexOf(boundary))
+          buffer = buffer.substring(buffer.indexOf(boundary) + boundary.length)
+
+          if (completeMsg.startsWith('data: ')) {
             try {
-              const jsonData = JSON.parse(line.substring(6))
-              if (jsonData.event === 'agent_message' || jsonData.event === 'message') {
-                const answerChunk = jsonData.answer
-                setMsgs(prev => {
-                  const lastMsg = prev[prev.length - 1]
-                  return [
-                    ...prev.slice(0, -1),
-                    { ...lastMsg, content: lastMsg.content + answerChunk },
-                  ]
-                })
+              const event: DifyTextChunkEvent = JSON.parse(completeMsg.substring(6))
+
+              if (event.event === 'text_chunk') {
+                const chunk = event.data.text
+                if (chunk) {
+                  setMsgs(prev => {
+                    const lastMsg = prev[prev.length - 1]
+                    return [
+                      ...prev.slice(0, -1),
+                      { ...lastMsg, content: lastMsg.content + chunk },
+                    ]
+                  })
+                }
               }
             } catch (err) {
-              console.error('err: ', err)
+              console.error('Failed to parse JSON chunk: ', err)
             }
           }
         }

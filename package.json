@@ -18,6 +18,7 @@
     "@mapbox/mapbox-sdk": "^0.16.1",
     "@reduxjs/toolkit": "^2.3.0",
     "@vercel/postgres": "^0.10.0",
+    "ahooks": "^3.9.5",
     "css-doodle": "^0.40.8",
     "date-fns": "^4.1.0",
     "deck.gl": "^9.0.33",
