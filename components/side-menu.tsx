@@ -7,7 +7,6 @@ import { setFilterParams } from '@/redux/filter-slice'
 import { RootState } from '@/lib/store'
 import RangeInput from '@/components/range-input'
 import { useState, useEffect } from 'react'
-import Chat from './ai/chat'
 
 interface SideMenuProps {
   toggleWindLayer: () => void;
@@ -210,7 +209,6 @@ const SideMenu: React.FC<SideMenuProps> = props => {
             热图图层
           </motion.button>
         </motion.div>
-        <Chat />
       </motion.div>
     </>
   )
