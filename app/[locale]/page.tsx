@@ -19,25 +19,28 @@ import '@/app/styles/bg.css'
 
 const LazyHeatMap = dynamic(() => import('@/components/charts/heat-pg'), {
   ssr: false,
-  loading: () => <ChartSkeleton className="h-96 md:h-[36rem] md:w-3/4" />,
+  loading: () => <ChartSkeleton className='h-96 md:h-[36rem] md:w-3/4' />,
 })
 const LazyAreaScatter = dynamic(() => import('@/components/charts/area'), {
   ssr: false,
-  loading: () => <ChartSkeleton className="flex-1 h-64" />,
+  loading: () => <ChartSkeleton className='h-64 flex-1' />,
 })
 const LazyTimeScatter = dynamic(() => import('@/components/charts/time'), {
   ssr: false,
-  loading: () => <ChartSkeleton className="h-96 md:h-[40rem] md:w-3/4" />,
+  loading: () => <ChartSkeleton className='h-96 md:h-[40rem] md:w-3/4' />,
 })
 const LazyCountryPie = dynamic(() => import('@/components/charts/pie'), {
   ssr: false,
-  loading: () => <ChartSkeleton className="flex-1 h-64" />,
+  loading: () => <ChartSkeleton className='h-64 flex-1' />,
 })
 
-const LazyBackgroundAnimation = dynamic(() => import('../../components/background-animation').then(mod => ({ default: mod.default })), {
-  ssr: false,
-  loading: () => <div className="absolute h-full w-full" />,
-})
+const LazyBackgroundAnimation = dynamic(
+  () => import('../../components/background-animation').then(mod => ({ default: mod.default })),
+  {
+    ssr: false,
+    loading: () => <div className='absolute h-full w-full' />,
+  },
+)
 
 const settings = {
   dots: true,
@@ -60,24 +63,22 @@ const images = [
 ]
 
 const ChartSkeleton = ({ className }: { className?: string }) => (
-  <div className={`bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse ${className}`}>
-    <div className="flex items-center justify-center h-full">
-      <div className="text-gray-400 dark:text-gray-500">loading...</div>
+  <div className={`animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700 ${className}`}>
+    <div className='flex h-full items-center justify-center'>
+      <div className='text-gray-400 dark:text-gray-500'>loading...</div>
     </div>
   </div>
 )
 
 const OptimizedBackground = () => (
-  <div className="absolute inset-0 overflow-hidden">
-    <div className="animate-float-slow absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-full blur-2xl" />
-    <div className="animate-float-medium absolute top-3/4 right-1/4 w-24 h-24 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-xl" />
-    <div className="animate-float-fast absolute top-1/2 left-3/4 w-20 h-20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-xl" />
+  <div className='absolute inset-0 overflow-hidden'>
+    <div className='animate-float-slow absolute left-1/4 top-1/4 h-32 w-32 rounded-full bg-gradient-to-r from-orange-500/10 to-red-500/10 blur-2xl' />
+    <div className='animate-float-medium absolute right-1/4 top-3/4 h-24 w-24 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-xl' />
+    <div className='animate-float-fast absolute left-3/4 top-1/2 h-20 w-20 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 blur-xl' />
   </div>
 )
 
 const MotionLink = motion.create(Link)
-
-
 
 const HomePage: React.FC = () => {
   const t = useTranslations()
@@ -101,7 +102,7 @@ const HomePage: React.FC = () => {
     <main className='relative h-screen w-full'>
       <div className='g-bg absolute h-full w-full overflow-hidden'>
         {showBackground ? (
-          <Suspense fallback={<div className="absolute h-full w-full" />}>
+          <Suspense fallback={<div className='absolute h-full w-full' />}>
             <LazyBackgroundAnimation />
           </Suspense>
         ) : (
@@ -157,8 +158,8 @@ const HomePage: React.FC = () => {
                     width={480}
                     height={320}
                     priority={image.priority || false}
-                    placeholder="blur"
-                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                    placeholder='blur'
+                    blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=='
                     className='h-72 w-full rounded-2xl object-cover lg:h-full'
                   />
                 </div>
@@ -238,26 +239,26 @@ const HomePage: React.FC = () => {
               全球48h内特大火灾发生时间与火点亮温图
             </p>
             {showCharts ? (
-              <Suspense fallback={<ChartSkeleton className="h-96 md:h-[40rem] md:w-3/4" />}>
+              <Suspense fallback={<ChartSkeleton className='h-96 md:h-[40rem] md:w-3/4' />}>
                 <LazyTimeScatter />
               </Suspense>
             ) : (
-              <ChartSkeleton className="h-96 md:h-[40rem] md:w-3/4" />
+              <ChartSkeleton className='h-96 md:h-[40rem] md:w-3/4' />
             )}
             <div className='mt-12 flex w-full flex-col gap-4 lg:max-w-5xl lg:flex-row'>
               {showCharts ? (
                 <>
-                  <Suspense fallback={<ChartSkeleton className="flex-1 h-64" />}>
+                  <Suspense fallback={<ChartSkeleton className='h-64 flex-1' />}>
                     <LazyCountryPie />
                   </Suspense>
-                  <Suspense fallback={<ChartSkeleton className="flex-1 h-64" />}>
+                  <Suspense fallback={<ChartSkeleton className='h-64 flex-1' />}>
                     <LazyAreaScatter />
                   </Suspense>
                 </>
               ) : (
                 <>
-                  <ChartSkeleton className="flex-1 h-64" />
-                  <ChartSkeleton className="flex-1 h-64" />
+                  <ChartSkeleton className='h-64 flex-1' />
+                  <ChartSkeleton className='h-64 flex-1' />
                 </>
               )}
             </div>
@@ -286,11 +287,11 @@ const HomePage: React.FC = () => {
             className='flex flex-col items-center justify-center'
           >
             {showCharts ? (
-              <Suspense fallback={<ChartSkeleton className="h-96 md:h-[36rem] md:w-3/4" />}>
+              <Suspense fallback={<ChartSkeleton className='h-96 md:h-[36rem] md:w-3/4' />}>
                 <LazyHeatMap />
               </Suspense>
             ) : (
-              <ChartSkeleton className="h-96 md:h-[36rem] md:w-3/4" />
+              <ChartSkeleton className='h-96 md:h-[36rem] md:w-3/4' />
             )}
           </motion.div>
         </div>
