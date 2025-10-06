@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
+import { BASE_URL } from '@/lib/api'
 
 interface Msg {
   role: 'user' | 'agent';
@@ -33,7 +34,7 @@ const Chat: React.FC = () => {
     setMsgs(prev => [...prev, { role: 'agent', content: '' }])
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

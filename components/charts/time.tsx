@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { BASE_URL } from '@/lib/api'
 import { Scatter } from '@ant-design/plots'
 
 interface DataItem {
@@ -14,7 +15,7 @@ const TimeScatter: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/time')
+        const res = await fetch(`${BASE_URL}/api/time`)
         if (!res.ok) throw new Error('Network Error')
         const jsonData = await res.json()
 
