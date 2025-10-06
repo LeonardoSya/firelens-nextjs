@@ -21,14 +21,32 @@ import { RootState } from '@/lib/store'
 import { type FirePoint } from 'map-types'
 import { format } from 'date-fns'
 import { throttle } from 'lodash'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+
+const getInitialPanelPos = (): { x: number, y: number } => {
+  if (typeof window === 'undefined') return { x: 0, y: 0 }
+  try {
+    const saved = localStorage.getItem('firelens-panel-pos')
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  const defaultX = Math.max(window.innerWidth - 360 - 24, 12)
+  const defaultY = Math.max(window.innerHeight * 0.5 - 200, 12)
+  return { x: defaultX, y: defaultY }
+}
+
+const persistPanelPos = (position: { x: number, y: number }) => {
+  try {
+    localStorage.setItem('firelens-panel-pos', JSON.stringify(position))
+  } catch {}
+}
 
 const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapInstance = useRef<mapboxgl.Map | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const dragBoundsRef = useRef<HTMLDivElement | null>(null)
 
   const [mapState, setMapState] = useState({
     isMapLoaded: false,
@@ -38,6 +56,15 @@ const Map: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false)
   const [firePoint, setFirePoint] = useState<FirePoint | null>(null)
   const [showFirePointId, setShowFirePointId] = useState<number>(0)
+  const [panelPos, setPanelPos] = useState<{ x: number, y: number }>(getInitialPanelPos)
+
+  const handlePanelDragEnd = useCallback((_: unknown, info: PanInfo) => {
+    setPanelPos(prev => {
+      const next = { x: prev.x + info.offset.x, y: prev.y + info.offset.y }
+      persistPanelPos(next)
+      return next
+    })
+  }, [])
 
   const filterParams = useAppSelector((state: RootState) => state.filter)
 
@@ -538,35 +565,62 @@ const Map: React.FC = () => {
               exit='hidden'
               className='space-y-1 font-semibold text-gray-950 dark:text-gray-400'
             >
-              {[
-                `受灾地区：${firePoint.district}`,
-                `火点地理坐标：${firePoint.loc.map(c => c.toFixed(2)).join(', ')}`,
-                `火点置信度：${firePoint.confidence}`,
-                `Ti4通道亮温 (开尔文)：${firePoint.bright_ti4}`,
-                `Ti5通道亮温 (开尔文)：${firePoint.bright_ti5}`,
-                `火灾辐射功率 (兆瓦)：${firePoint.frp}`,
-                `受灾区域 NDVI：${firePoint.ndvi}`,
-                `受灾时间：${firePoint.dateTime}`,
-                `受灾时段：${firePoint.daynight ? '白天' : '夜晚'}`,
-                `监测卫星：${firePoint.satellite}`,
-                `数据来源：VIIRS 375m / NOAA-21`,
-              ].map((item, index) => (
-                <motion.li
-                  key={index}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 },
-                    exit: { opacity: 0, y: 20 },
-                  }}
-                  transition={{ duration: 0.3 }}
+              <div
+                onClick={() => setShowFirePointId(0)}
+                className='absolute right-2 top-2 transform cursor-pointer text-gray-900 duration-150 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              >
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-7 w-auto'
+                  viewBox='0 0 512 512'
                 >
-                  {item}
-                </motion.li>
-              ))}
-            </motion.ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  <path
+                    fill='none'
+                    stroke='currentColor'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='32'
+                    d='M368 368L144 144M368 144L144 368'
+                  />
+                </svg>
+              </div>
+              <motion.ul
+                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
+                initial='hidden'
+                animate='visible'
+                exit='hidden'
+                className='space-y-1 font-semibold text-gray-950 dark:text-gray-400'
+              >
+                {[
+                  `受灾地区：${firePoint.district}`,
+                  `火点地理坐标：${firePoint.loc.map(c => c.toFixed(2)).join(', ')}`,
+                  `火点置信度：${firePoint.confidence}`,
+                  `Ti4通道亮温 (开尔文)：${firePoint.bright_ti4}`,
+                  `Ti5通道亮温 (开尔文)：${firePoint.bright_ti5}`,
+                  `火灾辐射功率 (兆瓦)：${firePoint.frp}`,
+                  `受灾区域 NDVI：${firePoint.ndvi}`,
+                  `受灾时间：${firePoint.dateTime}`,
+                  `受灾时段：${firePoint.daynight ? '白天' : '夜晚'}`,
+                  `监测卫星：${firePoint.satellite}`,
+                  `数据来源：VIIRS 375m / NOAA-21`,
+                ].map((item, index) => (
+                  <motion.li
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 },
+                      exit: { opacity: 0, y: 20 },
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {item}
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* 加载指示器 */}
       {isDataLoaded && (
