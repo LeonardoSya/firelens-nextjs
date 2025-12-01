@@ -1,8 +1,8 @@
 {
   "root": {
-    "tab1": "项目首页",
-    "tab2": "可视化平台",
-    "tab3": "GitHub",
+    "tab1": "产品首页",
+    "tab2": "智能监测",
+    "tab3": "开源仓库",
     "signIn": "登录",
     "getStart": {
       "short": "体验",
@@ -19,7 +19,7 @@
     "browserNotSupported": "您的浏览器不支持Mapbox",
     "searchPlaceholder": "搜索",
     "sideMenu": {
-      "title": "筛选菜单",
+      "title": "Side Menu",
       "confidence": "置信度",
       "confidenceAll": "全部",
       "confidenceNominal": "一般",
@@ -62,6 +62,7 @@
     "modelDesc": "基于DeepSeek-R1和通义千问Plus模型的火灾监测智能体",
     "inputPlaceholder": "向 Firelens 提问世界上任意角落发生的火情状况...",
     "welcome": "今天有什么可以帮您？",
+    "stopGeneration": "停止生成",
     "prompts": {
       "p1": "结合当前的气温、湿度和风速，分析中国东北地区当前的火灾扩散风险等级",
       "p2": "澳大利亚最近的林火状况如何？火情是否会向城市方向蔓延？"

@@ -38,7 +38,7 @@ export const MessageBubble = ({ msg }: { msg: Msg }) => {
           }`}
         >
           <div
-            className={`whitespace-pre-wrap break-words leading-3 ${!isUser && !msg.content && !msg.reasoning ? 'italic text-gray-400' : ''}`}
+            className={`whitespace-pre-wrap break-words leading-5 ${!isUser && !msg.content && !msg.reasoning ? 'italic text-gray-400' : ''}`}
           >
             {isUser ? (
               msg.content

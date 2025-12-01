@@ -62,6 +62,7 @@
     "modelDesc": "DeepSeek-R1 Reasoning Model",
     "inputPlaceholder": "Ask anything about fire safety...",
     "welcome": "How can I help you today?",
+    "stopGeneration": "Stop Generation",
     "prompts": {
       "p1": "Based on current temperature, humidity, and wind speed, analyze the fire spread risk level in Northeast China",
       "p2": "What is the current bushfire situation in Australia? Is the fire likely to spread toward urban areas?"
