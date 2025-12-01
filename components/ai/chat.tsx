@@ -179,10 +179,18 @@ const Chat: React.FC = () => {
                 {conversations.map(conv => {
                   const isConvLoading = conv.status === 'loading' || conv.status === 'streaming'
                   return (
-                    <button
+                    <div
                       key={conv.id}
+                      role='button'
+                      tabIndex={0}
                       onClick={() => setCurrentConvId(conv.id)}
-                      className={`group relative w-full rounded-lg px-3 py-3 text-left text-sm transition-all ${
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          setCurrentConvId(conv.id)
+                        }
+                      }}
+                      className={`group relative w-full cursor-pointer rounded-lg px-3 py-3 text-left text-sm transition-all ${
                         currentConvId === conv.id
                           ? 'bg-gray-100 font-medium text-orange-600 dark:bg-gray-800 dark:text-orange-400'
                           : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -217,7 +225,7 @@ const Chat: React.FC = () => {
                           <CloseIcon className='h-3 w-3' />
                         </button>
                       </div>
-                    </button>
+                    </div>
                   )
                 })}
               </div>
