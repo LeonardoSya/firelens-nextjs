@@ -6,7 +6,7 @@
     "signIn": "Sign In",
     "getStart": {
       "short": "Get Started",
-      "long": "Let's "
+      "long": ""
     }
   },
   "home": {
@@ -16,12 +16,55 @@
     "team": "Beijing Forestry University · Firelens Team"
   },
   "map": {
-    "menu": {
-      "filterDate": "Filter Period",
-      "filterFrp": "Disaster Severity",
-      "filterDayNight": "Filter Day or Night",
+    "browserNotSupported": "Your browser does not support Mapbox",
+    "searchPlaceholder": "Search",
+    "sideMenu": {
+      "title": "Filter Menu",
+      "confidence": "Conf",
+      "confidenceAll": "All",
+      "confidenceNominal": "Nominal",
+      "confidenceLow": "Low",
+      "confidenceHigh": "High",
+      "dayNight": "Time",
+      "dayNightAll": "All Day",
+      "dayNightDay": "Day",
+      "dayNightNight": "Night",
+      "brightTi4": "Ti4 Brightness (K)",
+      "brightTi5": "Ti5 Brightness (K)",
+      "frp": "Fire Radiative Power (MW)",
+      "windLayer": "Wind",
+      "heatLayer": "Heat"
+    },
+    "firePoint": {
+      "district": "Affected Area",
+      "coordinates": "Fire Point Coordinates",
+      "confidence": "Confidence Level",
+      "brightTi4": "Ti4 Brightness Temp (K)",
+      "brightTi5": "Ti5 Brightness Temp (K)",
+      "frp": "Fire Radiative Power (MW)",
+      "ndvi": "Affected Area NDVI",
+      "dateTime": "Detection Time",
+      "dayNight": "Time of Day",
       "day": "Day",
-      "night": "Night"
+      "night": "Night",
+      "satellite": "Monitoring Satellite",
+      "dataSource": "Data Source",
+      "dataSourceValue": "VIIRS 375m / NOAA-21"
+    }
+  },
+  "chat": {
+    "deepThinking": "Thinking Process",
+    "thinking": "Thinking...",
+    "agentPreparing": "Agent is preparing...",
+    "newChat": "New Chat",
+    "history": "History",
+    "title": "Firelens AI",
+    "modelDesc": "DeepSeek-R1 Reasoning Model",
+    "inputPlaceholder": "Ask anything about fire safety...",
+    "welcome": "How can I help you today?",
+    "prompts": {
+      "p1": "Based on current temperature, humidity, and wind speed, analyze the fire spread risk level in Northeast China",
+      "p2": "What is the current bushfire situation in Australia? Is the fire likely to spread toward urban areas?"
     }
   }
 }

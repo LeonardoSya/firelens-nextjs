@@ -16,12 +16,55 @@
     "team": "北京林业大学 ·  Firelens 团队"
   },
   "map": {
-    "menu": {
-      "filterDate": "筛选监测时段",
-      "filterFrp": "受灾严重度",
-      "filterDayNight": "筛选时段",
+    "browserNotSupported": "您的浏览器不支持Mapbox",
+    "searchPlaceholder": "搜索",
+    "sideMenu": {
+      "title": "筛选菜单",
+      "confidence": "置信度",
+      "confidenceAll": "全部",
+      "confidenceNominal": "一般",
+      "confidenceLow": "较低",
+      "confidenceHigh": "较高",
+      "dayNight": "筛选时段",
+      "dayNightAll": "全天",
+      "dayNightDay": "白天",
+      "dayNightNight": "晚上",
+      "brightTi4": "Ti4通道亮温(K)",
+      "brightTi5": "Ti5通道亮温(K)",
+      "frp": "火灾辐射功率(MW)",
+      "windLayer": "风场图层",
+      "heatLayer": "热图图层"
+    },
+    "firePoint": {
+      "district": "受灾地区",
+      "coordinates": "火点地理坐标",
+      "confidence": "火点置信度",
+      "brightTi4": "Ti4通道亮温 (开尔文)",
+      "brightTi5": "Ti5通道亮温 (开尔文)",
+      "frp": "火灾辐射功率 (兆瓦)",
+      "ndvi": "受灾区域 NDVI",
+      "dateTime": "受灾时间",
+      "dayNight": "受灾时段",
       "day": "白天",
-      "night": "夜晚"
+      "night": "夜晚",
+      "satellite": "监测卫星",
+      "dataSource": "数据来源",
+      "dataSourceValue": "VIIRS 375m / NOAA-21"
+    }
+  },
+  "chat": {
+    "deepThinking": "思考过程",
+    "thinking": "深度思考中...",
+    "agentPreparing": "数据分析中，预计等待30秒...",
+    "newChat": "新对话",
+    "history": "历史记录",
+    "title": "Firelens AI Agent",
+    "modelDesc": "基于DeepSeek-R1和通义千问Plus模型的火灾监测智能体",
+    "inputPlaceholder": "向 Firelens 提问世界上任意角落发生的火情状况...",
+    "welcome": "今天有什么可以帮您？",
+    "prompts": {
+      "p1": "结合当前的气温、湿度和风速，分析中国东北地区当前的火灾扩散风险等级",
+      "p2": "澳大利亚最近的林火状况如何？火情是否会向城市方向蔓延？"
     }
   }
 }

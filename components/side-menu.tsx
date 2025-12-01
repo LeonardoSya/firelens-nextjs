@@ -7,6 +7,7 @@ import { setFilterParams } from '@/redux/filter-slice'
 import { RootState } from '@/lib/store'
 import RangeInput from '@/components/range-input'
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface SideMenuProps {
   toggleWindLayer: () => void;
@@ -14,6 +15,7 @@ interface SideMenuProps {
 }
 
 const SideMenu: React.FC<SideMenuProps> = props => {
+  const t = useTranslations('map.sideMenu')
   const { toggleWindLayer } = props
   const [isOpen, setIsOpen] = useState(true)
 
@@ -36,16 +38,16 @@ const SideMenu: React.FC<SideMenuProps> = props => {
   const filterParams = useAppSelector((state: RootState) => state.filter)
 
   const confidenceOptions = [
-    { value: '', label: '全部' },
-    { value: 'nominal', label: '一般' },
-    { value: 'low', label: '较低' },
-    { value: 'high', label: '较高' },
+    { value: '', label: t('confidenceAll') },
+    { value: 'nominal', label: t('confidenceNominal') },
+    { value: 'low', label: t('confidenceLow') },
+    { value: 'high', label: t('confidenceHigh') },
   ]
 
   const daynightOptions = [
-    { value: '', label: '全天' },
-    { value: 'D', label: '白天' },
-    { value: 'N', label: '晚上' },
+    { value: '', label: t('dayNightAll') },
+    { value: 'D', label: t('dayNightDay') },
+    { value: 'N', label: t('dayNightNight') },
   ]
   const handleFilterChange = (key: string, value: unknown) => {
     dispatch(setFilterParams({ [key]: value }))
@@ -93,7 +95,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
             <path d='M368 160H144a16 16 0 010-32h224a16 16 0 010 32zM384 224H128a16 16 0 010-32h256a16 16 0 010 32z' />
           </svg>
           <span className='font-tiny text-xl font-bold tracking-tight text-neutral-700 dark:text-neutral-200'>
-            FILTER MENU
+            {t('title').toUpperCase()}
           </span>
         </div>
         {/* confidence */}
@@ -103,7 +105,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
           transition={{ duration: 0.2 }}
           className='flex items-center justify-between py-1 pl-2'
         >
-          <p className='text-md font-semibold tracking-widest'>置信度</p>
+          <p className='text-md font-semibold tracking-widest'>{t('confidence')}</p>
           <select
             className='cursor-pointer rounded-md border border-gray-800 bg-white py-1 pl-4 pr-3 text-sm transition-colors duration-200 hover:bg-gray-900 hover:text-white focus:border-gray-800 focus:outline-none focus:ring-0 dark:border-gray-800 dark:bg-gray-800 dark:text-white dark:focus:border-gray-800'
             value={filterParams.confidence || ''}
@@ -123,7 +125,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
           transition={{ delay: 0.05, duration: 0.2 }}
           className='mt-2 flex items-center justify-between py-1 pl-2'
         >
-          <p className='text-md font-semibold tracking-widest'>筛选时段</p>
+          <p className='text-md font-semibold tracking-widest'>{t('dayNight')}</p>
           <select
             className='cursor-pointer rounded-md border border-gray-800 bg-white py-1 pl-4 pr-3 text-sm transition-colors duration-200 hover:bg-gray-900 hover:text-white focus:border-gray-800 focus:outline-none focus:ring-0 dark:border-gray-800 dark:bg-gray-800 dark:text-white dark:focus:border-gray-800'
             value={filterParams.daynight || ''}
@@ -143,7 +145,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
           transition={{ delay: 0.1, duration: 0.2 }}
         >
           <RangeInput
-            label='Ti4通道亮温(K)'
+            label={t('brightTi4')}
             defaultMinValue={290}
             defaultMaxValue={360}
             minValue={filterParams.minBrightTi4}
@@ -159,7 +161,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
           transition={{ delay: 0.15, duration: 0.2 }}
         >
           <RangeInput
-            label='Ti5通道亮温(K)'
+            label={t('brightTi5')}
             defaultMinValue={250}
             defaultMaxValue={360}
             minValue={filterParams.minBrightTi5}
@@ -176,7 +178,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
           className='mb-1'
         >
           <RangeInput
-            label='火灾辐射功率(MW)'
+            label={t('frp')}
             defaultMinValue={0.01}
             defaultMaxValue={400}
             minValue={filterParams.minFrp}
@@ -198,7 +200,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
             onClick={toggleWindLayer}
             className='rounded-md border border-gray-800 bg-white px-3 py-2 text-sm transition-colors duration-200 hover:bg-gray-900 hover:text-white focus:border-gray-800 focus:outline-none focus:ring-0 dark:border-gray-800 dark:bg-gray-800 dark:text-white dark:focus:border-gray-800'
           >
-            风场图层
+            {t('windLayer')}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -206,7 +208,7 @@ const SideMenu: React.FC<SideMenuProps> = props => {
             onClick={() => {}}
             className='rounded-md border border-gray-800 bg-white px-3 py-2 text-sm transition-colors duration-200 hover:bg-gray-900 hover:text-white focus:border-gray-800 focus:outline-none focus:ring-0 dark:border-gray-800 dark:bg-gray-800 dark:text-white dark:focus:border-gray-800'
           >
-            热图图层
+            {t('heatLayer')}
           </motion.button>
         </motion.div>
       </motion.div>
