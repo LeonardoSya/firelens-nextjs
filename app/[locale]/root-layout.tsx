@@ -279,7 +279,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </motion.div>
               </div>
               <div className='flex items-center gap-x-5 md:gap-x-8'>
-                <motion.div className='hidden md:block' variants={itemVariants}>
+                <motion.div className='hidden' variants={itemVariants}>
                   <MotionLink
                     href='/map'
                     className='inline-block transform cursor-pointer rounded-lg px-2 py-1 tracking-widest text-slate-700 duration-75 hover:bg-slate-100 focus-visible:outline-none focus-visible:outline-1 focus-visible:outline-slate-400 dark:font-semibold dark:text-slate-300 dark:hover:bg-neutral-950 dark:hover:text-white'

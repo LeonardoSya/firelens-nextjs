@@ -22,10 +22,12 @@ import { type FirePoint } from 'map-types'
 import { format } from 'date-fns'
 import { throttle } from 'lodash'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
 const Map: React.FC = () => {
+  const t = useTranslations('map')
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapInstance = useRef<mapboxgl.Map | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -38,13 +40,15 @@ const Map: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false)
   const [firePoint, setFirePoint] = useState<FirePoint | null>(null)
   const [showFirePointId, setShowFirePointId] = useState<number>(0)
+  const [firePointPanelPos, setFirePointPanelPos] = useState({ x: 0, y: 0 })
+  const constraintsRef = useRef<HTMLDivElement>(null)
 
   const filterParams = useAppSelector((state: RootState) => state.filter)
 
   // 初始化地图
   useEffect(() => {
     if (!mapboxgl.supported()) {
-      alert('您的浏览器不支持Mapbox')
+      alert(t('browserNotSupported'))
       return
     }
 
@@ -65,7 +69,7 @@ const Map: React.FC = () => {
         const geocoder = new MapboxGeocoder({
           accessToken,
           mapboxgl: mapboxgl,
-          placeholder: '搜索',
+          placeholder: t('searchPlaceholder'),
         })
 
         const geocoderContainer = document.createElement('div')
@@ -209,20 +213,53 @@ const Map: React.FC = () => {
         data,
       })
 
+      // 脉冲光环图层（底层）
+      mapInstance.current.addLayer({
+        id: 'fire_points_pulse',
+        type: 'circle',
+        source: 'fire_points',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#ea580c',
+          'circle-opacity': 0.6,
+          'circle-blur': 0.8,
+        },
+      })
+
+      // 火点主图层（顶层）
       mapInstance.current.addLayer({
         id: 'fire_points_layer',
         type: 'circle',
         source: 'fire_points',
         paint: {
-          'circle-radius': 6,
-          'circle-color': '#e20303',
-          'circle-blur': 0.4,
-          'circle-stroke-color': '#333333',
+          'circle-radius': 5,
+          'circle-color': '#ea580c',
+          'circle-blur': 0.2,
+          'circle-stroke-color': '#7c2d12',
           'circle-stroke-width': 1,
-          'circle-stroke-opacity': 0.7,
+          'circle-stroke-opacity': 0.8,
           'circle-emissive-strength': 1,
         },
       })
+
+      // 脉冲动画 - 节流到 ~24fps 优化性能
+      let lastTime = 0
+      const frameInterval = 42 // ~24fps (1000/24 ≈ 42ms)
+      const animatePulse = (currentTime: number) => {
+        if (currentTime - lastTime >= frameInterval) {
+          lastTime = currentTime
+          const time = currentTime / 1000
+          const pulseRadius = 8 + Math.sin(time * 2.5) * 4
+          const pulseOpacity = 0.4 + Math.sin(time * 2.5) * 0.3
+
+          if (mapInstance.current?.getLayer('fire_points_pulse')) {
+            mapInstance.current.setPaintProperty('fire_points_pulse', 'circle-radius', pulseRadius)
+            mapInstance.current.setPaintProperty('fire_points_pulse', 'circle-opacity', pulseOpacity)
+          }
+        }
+        requestAnimationFrame(animatePulse)
+      }
+      requestAnimationFrame(animatePulse)
       // 鼠标事件
       mapInstance.current.on('mouseenter', 'fire_points_layer', () => {
         mapInstance.current.getCanvas().style.cursor = 'pointer'
@@ -508,14 +545,30 @@ const Map: React.FC = () => {
       />
 
       {/* 火点信息弹窗 */}
+      <div ref={constraintsRef} className='pointer-events-none fixed inset-0 z-10' />
       <AnimatePresence>
         {showFirePointId !== 0 && (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 0 }}
-            className='absolute right-0 top-1/2 z-10 max-w-96 transform rounded-xl bg-white bg-opacity-85 p-4 pr-10 text-xs duration-100 dark:bg-gray-950 dark:bg-opacity-80 md:right-96'
+            drag
+            dragMomentum={false}
+            dragConstraints={constraintsRef}
+            dragElastic={0.1}
+            onDragEnd={(_, info) => {
+              setFirePointPanelPos(prev => ({
+                x: prev.x + info.offset.x,
+                y: prev.y + info.offset.y,
+              }))
+            }}
+            initial={{ opacity: 0, scale: 0.95, x: firePointPanelPos.x, y: firePointPanelPos.y }}
+            animate={{ opacity: 1, scale: 1, x: firePointPanelPos.x, y: firePointPanelPos.y }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className='fixed right-4 top-1/2 z-20 max-w-96 -translate-y-1/2 cursor-grab rounded-xl bg-white/90 p-4 pr-10 text-xs shadow-2xl backdrop-blur-md active:cursor-grabbing dark:bg-gray-950/90 md:right-[26rem]'
+            style={{ touchAction: 'none' }}
           >
+            {/* 拖动提示条 */}
+            <div className='absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-gray-300 dark:bg-gray-600' />
+            {/* 关闭按钮 */}
             <div
               onClick={() => setShowFirePointId(0)}
               className='absolute right-2 top-2 transform cursor-pointer text-gray-900 duration-150 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -532,33 +585,33 @@ const Map: React.FC = () => {
               </svg>
             </div>
             <motion.ul
-              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
               initial='hidden'
               animate='visible'
               exit='hidden'
-              className='space-y-1 font-semibold text-gray-950 dark:text-gray-400'
+              className='mt-2 space-y-1.5 font-semibold text-gray-950 dark:text-gray-400'
             >
               {[
-                `受灾地区：${firePoint.district}`,
-                `火点地理坐标：${firePoint.loc.map(c => c.toFixed(2)).join(', ')}`,
-                `火点置信度：${firePoint.confidence}`,
-                `Ti4通道亮温 (开尔文)：${firePoint.bright_ti4}`,
-                `Ti5通道亮温 (开尔文)：${firePoint.bright_ti5}`,
-                `火灾辐射功率 (兆瓦)：${firePoint.frp}`,
-                `受灾区域 NDVI：${firePoint.ndvi}`,
-                `受灾时间：${firePoint.dateTime}`,
-                `受灾时段：${firePoint.daynight ? '白天' : '夜晚'}`,
-                `监测卫星：${firePoint.satellite}`,
-                `数据来源：VIIRS 375m / NOAA-21`,
+                `${t('firePoint.district')}：${firePoint.district}`,
+                `${t('firePoint.coordinates')}：${firePoint.loc.map(c => c.toFixed(2)).join(', ')}`,
+                `${t('firePoint.confidence')}：${firePoint.confidence}`,
+                `${t('firePoint.brightTi4')}：${firePoint.bright_ti4}`,
+                `${t('firePoint.brightTi5')}：${firePoint.bright_ti5}`,
+                `${t('firePoint.frp')}：${firePoint.frp}`,
+                `${t('firePoint.ndvi')}：${firePoint.ndvi}`,
+                `${t('firePoint.dateTime')}：${firePoint.dateTime}`,
+                `${t('firePoint.dayNight')}：${firePoint.daynight ? t('firePoint.day') : t('firePoint.night')}`,
+                `${t('firePoint.satellite')}：${firePoint.satellite}`,
+                `${t('firePoint.dataSource')}：${t('firePoint.dataSourceValue')}`,
               ].map((item, index) => (
                 <motion.li
                   key={index}
                   variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 },
-                    exit: { opacity: 0, y: 20 },
+                    hidden: { opacity: 0, x: -10 },
+                    visible: { opacity: 1, x: 0 },
+                    exit: { opacity: 0, x: -10 },
                   }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.25 }}
                 >
                   {item}
                 </motion.li>

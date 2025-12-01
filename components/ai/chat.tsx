@@ -1,196 +1,336 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
-import { BASE_URL } from '@/lib/api'
+import { useState, FormEvent, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { v4 as uuidv4 } from 'uuid'
+import { useTranslations } from 'next-intl'
 
-interface Msg {
-  role: 'user' | 'agent';
-  content: string;
-}
+// Import from new split files
+import { Msg, Conversation } from './chat-ui/types'
+import { ChatIcon, CloseIcon, FireIcon, ArrowUpIcon, PlusIcon, StopIcon } from './chat-ui/icons'
+import { MessageBubble } from './chat-ui/message-bubble'
+import { useConversationManager } from './chat-ui/use-conversation'
 
-interface DifyTextChunkEvent {
-  event: 'text_chunk',
-  data: {
-    text: string;
-  }
-  workflow_run_id:string
-  task_id: string;
-}
+const EMPTY_MSGS: Msg[] = []
 
+// --- Main Chat Component ---
 const Chat: React.FC = () => {
-  const [msgs, setMsgs] = useState<Msg[]>([])
+  const t = useTranslations('chat')
+  const [isOpen, setIsOpen] = useState(false)
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [currentConvId, setCurrentConvId] = useState<string | null>(null)
   const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const hasMsgs = msgs.length > 0
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || isLoading) return
+  const SUGGESTED_PROMPTS = [t('prompts.p1'), t('prompts.p2')]
 
-    const userMsg: Msg = { role: 'user', content: text }
-    setMsgs(prev => [...prev, userMsg])
-    setInput('')
-    setIsLoading(true)
+  const updateConversation = useCallback(
+    (id: string, updater: (conv: Conversation) => Conversation) => {
+      setConversations(prev => prev.map(c => (c.id === id ? updater(c) : c)))
+    },
+    [],
+  )
 
-    setMsgs(prev => [...prev, { role: 'agent', content: '' }])
+  // 使用对话管理 hook
+  const { sendMessage, cancelRequest, cancelAllRequests } =
+    useConversationManager(updateConversation)
 
-    try {
-      const res = await fetch(`${BASE_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: text,
-          user: 'test-user',
-        }),
-      })
-
-      if (!res.ok || !res.body) {
-        throw new Error('Failed to get response')
+  // Initialize with one conversation if empty
+  useEffect(() => {
+    if (conversations.length === 0) {
+      const newConv: Conversation = {
+        id: uuidv4(),
+        title: t('newChat'),
+        messages: [],
+        updatedAt: Date.now(),
+        status: 'idle',
       }
+      setConversations([newConv])
+      setCurrentConvId(newConv.id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder('utf-8')
+  // 清理：组件卸载时取消所有请求
+  useEffect(() => {
+    return () => {
+      cancelAllRequests()
+    }
+  }, [cancelAllRequests])
 
-      let buffer = ''
+  const createNewConversation = useCallback(() => {
+    const newConv: Conversation = {
+      id: uuidv4(),
+      title: t('newChat'),
+      messages: [],
+      updatedAt: Date.now(),
+      status: 'idle',
+    }
+    setConversations(prev => [newConv, ...prev])
+    setCurrentConvId(newConv.id)
+    return newConv.id
+  }, [t])
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+  const currentConversation = conversations.find(c => c.id === currentConvId) || conversations[0]
+  const msgs = currentConversation?.messages || EMPTY_MSGS
+  // 当前对话是否正在加载（独立状态）
+  const isLoading =
+    currentConversation?.status === 'loading' || currentConversation?.status === 'streaming'
 
-        buffer += decoder.decode(value, { stream: true })
-        const boundary = '\n\n'
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [msgs, isOpen, currentConvId])
 
-        while (buffer.includes(boundary)) {
-          const completeMsg = buffer.substring(0, buffer.indexOf(boundary))
-          buffer = buffer.substring(buffer.indexOf(boundary) + boundary.length)
-
-          if (completeMsg.startsWith('data: ')) {
-            try {
-              const event: DifyTextChunkEvent = JSON.parse(completeMsg.substring(6))
-
-              if (event.event === 'text_chunk') {
-                const chunk = event.data.text
-                if (chunk) {
-                  setMsgs(prev => {
-                    const lastMsg = prev[prev.length - 1]
-                    return [
-                      ...prev.slice(0, -1),
-                      { ...lastMsg, content: lastMsg.content + chunk },
-                    ]
-                  })
-                }
-              }
-            } catch (err) {
-              console.error('Failed to parse JSON chunk: ', err)
-            }
+  const deleteConversation = useCallback(
+    (id: string, e: React.MouseEvent) => {
+      e.stopPropagation()
+      // 删除对话时，取消该对话的请求
+      cancelRequest(id)
+      setConversations(prev => {
+        const newConvs = prev.filter(c => c.id !== id)
+        // If we deleted the current conversation, switch to the first one or create a new one
+        if (id === currentConvId) {
+          if (newConvs.length > 0) {
+            setCurrentConvId(newConvs[0].id)
+          } else {
+            // If all deleted, creating a new one will happen in useEffect if we rely on length=0,
+            // but better to do it explicitly or let the effect handle it.
+            // The existing effect handles length === 0.
+            setCurrentConvId(null) // This will trigger the effect to create a new one
           }
         }
-      }
-    } catch (err) {
-      console.error('Error fetching chat res: ', err)
-      setMsgs(prev => {
-        const lastMsg = prev[prev.length - 1]
-        return [...prev.slice(0, -1), { ...lastMsg, content: 'HandleSubmit Error ~' }]
+        return newConvs
       })
-    } finally {
-      setIsLoading(false)
+    },
+    [currentConvId, cancelRequest],
+  )
+
+  const handleSendMessage = useCallback(
+    async (text: string) => {
+      if (!text.trim() || isLoading || !currentConvId) return
+      setInput('')
+      await sendMessage(currentConvId, text)
+    },
+    [currentConvId, isLoading, sendMessage],
+  )
+
+  const handleStopGeneration = useCallback(() => {
+    if (currentConvId) {
+      cancelRequest(currentConvId)
     }
-  }
+  }, [currentConvId, cancelRequest])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    await sendMessage(input)
+    await handleSendMessage(input)
   }
 
   return (
-    <div className="fixed right-0 top-80 w-[324px] max-h-[60vh] rounded-xl bg-white p-4 shadow-lg dark:bg-gradient-to-t dark:from-gray-900 dark:to-gray-950 z-10 flex flex-col">
-      <div className='mb-3 flex items-center gap-x-3 px-1'>
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          className='h-auto w-6'
-          viewBox='0 0 512 512'
-          style={{ fill: 'rgb(194,65,12)' }}
-        >
-          <path d='M390.42 75.28a10.45 10.45 0 01-5.32-1.44C340.72 50.08 302.35 40 256.35 40c-45.77 0-89.23 11.28-128.76 33.84C122 77 115.11 74.8 111.87 69a12.4 12.4 0 014.63-16.32A281.81 281.81 0 01256.35 16c49.23 0 92.23 11.28 139.39 36.48a12 12 0 014.85 16.08 11.3 11.3 0 01-10.17 6.72zm-330.79 126a11.73 11.73 0 01-6.7-2.16 12.26 12.26 0 01-2.78-16.8c22.89-33.6 52-60 86.69-78.48 72.58-38.84 165.51-39.12 238.32-.24 34.68 18.48 63.8 44.64 86.69 78a12.29 12.29 0 01-2.78 16.8 11.26 11.26 0 01-16.18-2.88c-20.8-30.24-47.15-54-78.36-70.56-66.34-35.28-151.18-35.28-217.29.24-31.44 16.8-57.79 40.8-78.59 71a10 10 0 01-9.02 5.08zM204.1 491a10.66 10.66 0 01-8.09-3.6C175.9 466.48 165 453 149.55 424c-16-29.52-24.27-65.52-24.27-104.16 0-71.28 58.71-129.36 130.84-129.36S387 248.56 387 319.84a11.56 11.56 0 11-23.11 0c0-58.08-48.32-105.36-107.72-105.36S148.4 261.76 148.4 319.84c0 34.56 7.39 66.48 21.49 92.4 14.8 27.6 25 39.36 42.77 58.08a12.67 12.67 0 010 17 12.44 12.44 0 01-8.56 3.68zm165.75-44.4c-27.51 0-51.78-7.2-71.66-21.36a129.1 129.1 0 01-55-105.36 11.57 11.57 0 1123.12 0 104.28 104.28 0 0044.84 85.44c16.41 11.52 35.6 17 58.72 17a147.41 147.41 0 0024-2.4c6.24-1.2 12.25 3.12 13.4 9.84a11.92 11.92 0 01-9.47 13.92 152.28 152.28 0 01-27.95 2.88zM323.38 496a13 13 0 01-3-.48c-36.76-10.56-60.8-24.72-86-50.4-32.37-33.36-50.16-77.76-50.16-125.28 0-38.88 31.9-70.56 71.19-70.56s71.2 31.68 71.2 70.56c0 25.68 21.5 46.56 48.08 46.56s48.08-20.88 48.08-46.56c0-90.48-75.13-163.92-167.59-163.92-65.65 0-125.75 37.92-152.79 96.72-9 19.44-13.64 42.24-13.64 67.2 0 18.72 1.61 48.24 15.48 86.64 2.32 6.24-.69 13.2-6.7 15.36a11.34 11.34 0 01-14.79-7 276.39 276.39 0 01-16.88-95c0-28.8 5.32-55 15.72-77.76 30.75-67 98.94-110.4 173.6-110.4 105.18 0 190.71 84.24 190.71 187.92 0 38.88-31.9 70.56-71.2 70.56s-71.2-31.68-71.2-70.56c.01-25.68-21.49-46.6-48.07-46.6s-48.08 20.88-48.08 46.56c0 41 15.26 79.44 43.23 108.24 22 22.56 43 35 75.59 44.4 6.24 1.68 9.71 8.4 8.09 14.64a11.39 11.39 0 01-10.87 9.16z' />
-        </svg>
-        <span className=' text-lg font-bold tracking-tight text-neutral-700 dark:text-neutral-200'>
-          Firelens AI Agent
-        </span>
-      </div>
-      <div className="flex-1 overflow-y-auto pr-1">
-        {hasMsgs ? (
-          <div className="space-y-4">
-            {msgs.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-lg px-4 py-2 whitespace-pre-wrap break-words text-sm ${
-                    msg.role === 'user'
-                      ? 'bg-[rgb(194,65,12)] text-white'
-                      : 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-                  }`}
-                >
-                  {msg.content || (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 mr-2" style={{ borderColor: 'rgb(194,65,12)' }}></div>
-                      思考中...
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="select-none">
-            <h3 className="mb-2 text-sm font-semibold tracking-tight text-neutral-800 dark:text-neutral-200">
-              向 Firelens AI Agent 询问任何你想知道的火灾信息
-            </h3>
-            <p className="mb-3 text-[11px] leading-5 text-neutral-500 dark:text-neutral-400">
-              Firelens AI 基于 DeepSeek-V3.1 和 通义千问-plus，让你以自然语言交互的形式，快速了解世界上任意角落发生的热点数据。
-            </p>
-            <div className="flex flex-col gap-2">
-              <button type="button" onClick={() => { const t = '最近72小时内，北京周边是否有火点风险？'; setInput(t); sendMessage(t); }} className="rounded-full border border-gray-800/40 px-3 py-2 text-left text-xs leading-5 text-neutral-700 hover:bg-gray-900 hover:text-white dark:border-gray-700 dark:text-neutral-300 whitespace-normal break-words">
-                最近72小时内，北京周边是否有火点风险？
-              </button>
-              <button type="button" onClick={() => { const t = '帮我分析内蒙古东部今日风向与火点关系'; setInput(t); sendMessage(t); }} className="rounded-full border border-gray-800/40 px-3 py-2 text-left text-xs leading-5 text-neutral-700 hover:bg-gray-900 hover:text-white dark:border-gray-700 dark:text-neutral-300 whitespace-normal break-words">
-                帮我分析内蒙古东部今日风向与火点关系
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      <form onSubmit={handleSubmit} className={hasMsgs ? "mt-3 border-t pt-3" : "mt-3"} style={hasMsgs ? { borderColor: 'rgb(194,65,12)' } : undefined}>
-        <div className="flex space-x-2">
-          <textarea
-            rows={1}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onInput={e => {
-              const el = e.currentTarget
-              el.style.height = 'auto'
-              const lineHeight = 20 
-              const padding = 16
-              const maxRows = 8
-              const contentHeight = Math.max(0, el.scrollHeight - padding)
-              const rows = Math.min(maxRows, Math.max(1, Math.ceil(contentHeight / lineHeight)))
-              el.style.height = `${rows * lineHeight + padding}px`
-            }}
-            disabled={isLoading}
-            placeholder='Hi, Firelens'
-            className="flex-grow px-3 py-2 text-sm leading-5 border border-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 resize-none overflow-y-auto"
-          />
-          <button
-            type='submit'
-            disabled={isLoading}
-            className="px-3 py-2 text-sm rounded-lg disabled:opacity-50"
-            style={{ backgroundColor: 'rgb(194,65,12)', color: 'white' }}
+    <>
+      {/* Floating Action Button */}
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(true)}
+            className='fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-orange-600 text-white shadow-xl shadow-orange-600/30 hover:bg-orange-700 focus:outline-none'
           >
-            {isLoading ? '思考中...' : 'Send'}
-          </button>
-        </div>
-      </form>
-    </div>
+            <ChatIcon className='h-7 w-7' />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Main Window */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className='fixed bottom-6 right-6 z-50 flex h-[700px] w-[900px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-white font-sans shadow-2xl ring-1 ring-black/5 dark:bg-gray-900 dark:ring-white/10'
+          >
+            {/* Sidebar (Left) */}
+            <div className='flex w-64 flex-shrink-0 flex-col border-r border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50'>
+              {/* Header */}
+              <div className='flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800'>
+                <span className='text-xs font-bold uppercase tracking-wider text-gray-500'>
+                  {t('history')}
+                </span>
+                <motion.button
+                  onClick={createNewConversation}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                  className='rounded-md border border-gray-200 bg-white p-1.5 text-gray-600 shadow-sm transition-colors hover:border-orange-200 hover:text-orange-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  title={t('newChat')}
+                >
+                  <PlusIcon className='h-4 w-4' />
+                </motion.button>
+              </div>
+
+              {/* List */}
+              <div className='flex-1 space-y-1 overflow-y-auto p-2'>
+                {conversations.map(conv => {
+                  const isConvLoading = conv.status === 'loading' || conv.status === 'streaming'
+                  return (
+                    <button
+                      key={conv.id}
+                      onClick={() => setCurrentConvId(conv.id)}
+                      className={`group relative w-full rounded-lg px-3 py-3 text-left text-sm transition-all ${
+                        currentConvId === conv.id
+                          ? 'bg-gray-100 font-medium text-orange-600 dark:bg-gray-800 dark:text-orange-400'
+                          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <div className='flex items-center gap-2'>
+                        {/* 状态指示器 */}
+                        {isConvLoading && (
+                          <span className='relative flex h-2 w-2 flex-shrink-0'>
+                            <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75' />
+                            <span className='relative inline-flex h-2 w-2 rounded-full bg-orange-500' />
+                          </span>
+                        )}
+                        <span className='truncate pr-4'>{conv.title}</span>
+                      </div>
+                      <div className='mt-0.5 font-mono text-[10px] opacity-50'>
+                        {new Date(conv.updatedAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </div>
+
+                      {/* Delete Button - Visible on hover or active */}
+                      <div
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100 ${currentConvId === conv.id ? 'opacity-100' : ''}`}
+                      >
+                        <button
+                          onClick={e => deleteConversation(conv.id, e)}
+                          className='rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-red-500 dark:hover:bg-gray-700'
+                          title='Delete Chat'
+                        >
+                          <CloseIcon className='h-3 w-3' />
+                        </button>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Chat Area (Right) */}
+            <div className='relative flex flex-1 flex-col bg-white dark:bg-gray-900'>
+              {/* Chat Header */}
+              <div className='flex h-14 items-center justify-between border-b border-gray-100 px-6 dark:border-gray-800'>
+                <div className='flex items-center gap-3'>
+                  <div className='flex h-8 w-8 items-center justify-center rounded-full bg-orange-50 text-orange-600 dark:bg-orange-900/20'>
+                    <FireIcon className='h-5 w-5' />
+                  </div>
+                  <div>
+                    <h2 className='text-sm font-bold text-gray-800 dark:text-white'>
+                      {t('title')}
+                    </h2>
+                    <p className='text-xs text-gray-500'>{t('modelDesc')}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
+                >
+                  <CloseIcon className='h-5 w-5' />
+                </button>
+              </div>
+
+              {/* Messages */}
+              <div className='flex-1 space-y-6 overflow-y-auto bg-white p-6 dark:bg-black/10'>
+                {msgs.length === 0 ? (
+                  <div className='flex h-full flex-col items-center justify-center pb-10 opacity-60'>
+                    <FireIcon className='mb-6 h-12 w-12 text-orange-200 dark:text-gray-700' />
+                    <h3 className='mb-8 text-xl font-semibold text-gray-700 dark:text-gray-300'>
+                      {t('welcome')}
+                    </h3>
+                    <motion.div
+                      className='flex w-full max-w-2xl flex-col gap-3 px-4'
+                      initial='hidden'
+                      animate='visible'
+                      variants={{
+                        hidden: {},
+                        visible: { transition: { staggerChildren: 0.1 } },
+                      }}
+                    >
+                      {SUGGESTED_PROMPTS.map((prompt, i) => (
+                        <motion.button
+                          key={i}
+                          onClick={() => handleSendMessage(prompt)}
+                          variants={{
+                            hidden: { opacity: 0, y: 20 },
+                            visible: { opacity: 1, y: 0 },
+                          }}
+                          whileHover={{ scale: 1.02, x: 8 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                          className='rounded-xl border border-gray-100 bg-gray-50 p-4 text-left text-sm leading-relaxed text-gray-600 transition-colors duration-200 hover:border-orange-200 hover:bg-gray-100 hover:shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-orange-500'
+                          style={{
+                            transitionProperty: 'border-color,background-color,box-shadow,color',
+                            transitionDuration: '200ms',
+                            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)', // 符合前摇感受
+                          }}
+                        >
+                          {prompt}
+                        </motion.button>
+                      ))}
+                    </motion.div>
+                  </div>
+                ) : (
+                  <>
+                    {msgs.map(msg => (
+                      <MessageBubble key={msg.id} msg={msg} />
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className='border-t border-gray-100 p-4 dark:border-gray-800'>
+                <form onSubmit={handleSubmit} className='relative mx-auto max-w-3xl'>
+                  <input
+                    type='text'
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder={t('inputPlaceholder')}
+                    className='h-12 w-full rounded-full border border-transparent bg-gray-50 pl-5 pr-12 text-sm outline-none ring-0 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 dark:bg-gray-800 dark:text-white dark:focus:border-orange-400'
+                  />
+                  {isLoading ? (
+                    <button
+                      type='button'
+                      onClick={handleStopGeneration}
+                      className='absolute right-2 top-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600'
+                      title={t('stopGeneration') || '停止生成'}
+                    >
+                      <StopIcon className='h-4 w-4' />
+                    </button>
+                  ) : (
+                    <button
+                      type='submit'
+                      disabled={!input.trim()}
+                      className='absolute right-2 top-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-white transition-colors hover:bg-orange-700 disabled:opacity-50 disabled:hover:bg-orange-600'
+                    >
+                      <ArrowUpIcon className='h-4 w-4' />
+                    </button>
+                  )}
+                </form>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
