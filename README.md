@@ -41,6 +41,8 @@ pnpm start
 - Vercel Postgres
 
 ## ✨ Features
+<img width="3448" height="2074" alt="image" src="https://github.com/user-attachments/assets/a05ec596-24cd-493f-b9af-f4c2098b1657" />
+
 ![image](https://github.com/user-attachments/assets/481e4600-08f5-4ca0-9f5b-cfb10edfffc2)
 ![image](https://github.com/user-attachments/assets/bd9e1cb9-333f-4a5f-86b7-fa54da8ab6e3)
 ![image](https://github.com/user-attachments/assets/53fd5ab6-4e08-4c12-b62e-5f428a527993)
