@@ -59,7 +59,7 @@
     "newChat": "新对话",
     "history": "历史记录",
     "title": "Firelens AI Agent",
-    "modelDesc": "基于DeepSeek-R1和通义千问Plus模型的火灾监测智能体",
+    "modelDesc": "基于DeepSeek-V3.2和阿里Qwen-Plus的火灾监测智能体",
     "inputPlaceholder": "向 Firelens 提问世界上任意角落发生的火情状况...",
     "welcome": "今天有什么可以帮您？",
     "stopGeneration": "停止生成",

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import { Msg } from './types'
 import { ThinkingBlock } from './thinking-block'
+import { ChartPanel } from './chart-panel'
 import { useTranslations } from 'next-intl'
 
 export const MessageBubble = ({ msg }: { msg: Msg }) => {
@@ -77,6 +78,9 @@ export const MessageBubble = ({ msg }: { msg: Msg }) => {
             )}
           </div>
         </div>
+
+        {/* Chart Panel (Only for Agent with chartData) */}
+        {!isUser && msg.chartData && <ChartPanel chartData={msg.chartData} />}
       </div>
     </motion.div>
   )

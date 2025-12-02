@@ -59,7 +59,7 @@
     "newChat": "New Chat",
     "history": "History",
     "title": "Firelens AI",
-    "modelDesc": "DeepSeek-R1 Reasoning Model",
+    "modelDesc": "DeepSeek-V3.2 Reasoning Model",
     "inputPlaceholder": "Ask anything about fire safety...",
     "welcome": "How can I help you today?",
     "stopGeneration": "Stop Generation",
