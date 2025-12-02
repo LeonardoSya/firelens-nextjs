@@ -254,7 +254,11 @@ const Map: React.FC = () => {
 
           if (mapInstance.current?.getLayer('fire_points_pulse')) {
             mapInstance.current.setPaintProperty('fire_points_pulse', 'circle-radius', pulseRadius)
-            mapInstance.current.setPaintProperty('fire_points_pulse', 'circle-opacity', pulseOpacity)
+            mapInstance.current.setPaintProperty(
+              'fire_points_pulse',
+              'circle-opacity',
+              pulseOpacity,
+            )
           }
         }
         requestAnimationFrame(animatePulse)
@@ -387,6 +391,37 @@ const Map: React.FC = () => {
       if (mapInstance.current) mapInstance.current.off('style.load', applyStyle)
     }
   }, [mapState.style])
+
+  // 监听图表点击事件，跳转到对应坐标
+  useEffect(() => {
+    const handleChartFlyTo = (
+      event: CustomEvent<{ latitude: number, longitude: number, frp: number }>,
+    ) => {
+      if (!mapInstance.current) return
+      const { latitude, longitude, frp } = event.detail
+
+      // 根据 FRP 强度决定缩放级别
+      const zoom = frp > 30 ? 12 : frp > 15 ? 10 : 9
+
+      // 计算偏移量：将目标点向左偏移，避免被右侧 Chat 窗口遮挡
+      const mapWidth = mapInstance.current.getContainer().clientWidth
+      const offsetPixels = mapWidth * 0.3
+
+      mapInstance.current.flyTo({
+        center: [longitude, latitude],
+        zoom,
+        duration: 2000,
+        pitch: 45,
+        bearing: 0,
+        padding: { right: offsetPixels, left: 0, top: 0, bottom: 0 },
+      })
+    }
+
+    window.addEventListener('firelens:map-fly-to', handleChartFlyTo as EventListener)
+    return () => {
+      window.removeEventListener('firelens:map-fly-to', handleChartFlyTo as EventListener)
+    }
+  }, [])
 
   // 风场图层
   useEffect(() => {
