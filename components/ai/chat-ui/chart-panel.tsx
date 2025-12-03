@@ -9,6 +9,9 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  LineController,
+  BarController,
+  BubbleController,
   Title,
   Tooltip,
   Legend,
@@ -18,13 +21,16 @@ import annotationPlugin from 'chartjs-plugin-annotation'
 import { Bar, Bubble } from 'react-chartjs-2'
 import { ChartData as ChartDataType, TrendDataPoint, ScatterDataPoint } from './types'
 
-// 注册 Chart.js 组件（包括 annotation 插件）
+// 注册 Chart.js 组件（包括 annotation 插件和控制器）
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
   BarElement,
+  LineController,
+  BarController,
+  BubbleController,
   Title,
   Tooltip,
   Legend,
