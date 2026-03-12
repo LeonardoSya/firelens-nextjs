@@ -76,7 +76,8 @@
   },
   "pnpm": {
     "overrides": {
-      "fast-xml-parser": "5.5.3"
+      "fast-xml-parser": "5.5.3",
+      "minimatch": "10.2.4"
     }
   }
 }
