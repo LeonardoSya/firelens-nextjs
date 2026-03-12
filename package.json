@@ -77,7 +77,8 @@
   "pnpm": {
     "overrides": {
       "fast-xml-parser": "5.5.3",
-      "minimatch": "10.2.4"
+      "minimatch": "10.2.4",
+      "glob": ">=10.4.5"
     }
   }
 }
