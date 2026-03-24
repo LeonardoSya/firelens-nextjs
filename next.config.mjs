@@ -10,21 +10,19 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    esmExternals: 'loose',
-    serverComponentsExternalPackages: [
-      '@ant-design/charts',
-      '@ant-design/plots',
-      '@antv/g2',
-      'd3-array',
-    ],
-  },
+  serverExternalPackages: [
+    '@ant-design/charts',
+    '@ant-design/plots',
+    '@antv/g2',
+    'd3-array',
+  ],
   env: {
     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
     NEXT_PUBLIC_DIFY_API_KEY: process.env.NEXT_PUBLIC_DIFY_API_KEY,
   },
   images: {
     domains: ['localhost'],
+    maximumDiskCacheSize: 256 * 1024 * 1024,
   },
   reactStrictMode: false,
   output: 'standalone',
